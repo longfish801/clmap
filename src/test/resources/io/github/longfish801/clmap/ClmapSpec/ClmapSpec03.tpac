@@ -1,0 +1,19 @@
+#! clmap テスト２
+
+## map map1
+# closure
+	return StringUtils.trim("   THIS IS ${arg} default.   ");
+
+# closure key1
+	return StringUtils.trim("   THIS IS ${arg} key1.   ");
+
+## map map3
+# args
+	String arg
+
+# closure
+	return StringUtils.trim("   THIS IS ${arg} default2.   ");
+
+# closure key3
+	return StringUtils.trim("   THIS IS ${arg} key3.   ");
+

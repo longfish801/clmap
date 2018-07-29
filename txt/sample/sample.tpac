@@ -1,0 +1,17 @@
+#! clmap テスト
+## map map1
+# args
+	String yourName
+
+# closure
+	return "Hello, ${yourName}!";
+
+# closure key1
+	return clmap.cl('map1').call(yourName.toLowerCase());
+
+# closure key2
+	config.msg = 'HELLO, WORLD!';
+	return clmap.cl('map1#nosuchKey').call(yourName.toUpperCase());
+
+# closure key3
+	return config.msg;

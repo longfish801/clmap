@@ -1,0 +1,144 @@
+
+【＃タイトル】Clmap記法
+
+■概要
+
+　Clmap記法はクロージャマップを定義するための記法です。
+　クロージャマップは複数のクロージャをまとめたものです。
+　引数と戻り値のインタフェースが同じクロージャをまとめて定義するのに適しています。
+
+　名称はクロージャ（Closure）のマップ（Map）に由来しています。
+　文法は【リンク：TPAC記法：tpac.html】がベースとなっています。
+
+■サンプル
+
+　クロージャマップのサンプルを以下に示します。
+　上記の内容をファイル 【リンク：sample/sample.tpac】に保存したとします。
+
+----- コード -----
+#! clmap テスト
+## map map1
+# args
+	String yourName
+
+# closure
+	return "Hello, ${yourName}!";
+
+# closure key1
+	return clmap.cl('map1').call(yourName.toLowerCase());
+
+# closure key2
+	config.msg = 'HELLO, WORLD!';
+	return clmap.cl('map1#nosuchKey').call(yourName.toUpperCase());
+
+# closure key3
+	return config.msg;
+----- コード -----
+
+　クロージャの実行には【リンク：Clmap：/clmap/groovydoc/io/github/longfish801/clmap/Clmap.html】クラスを利用します。
+　map, closureそれぞれの名称を半角シャープ(#)でつないだコンビキーでクロージャを呼びます。
+　map名のみ、あるいは closureの名前が存在しない場合は、名前を省略した closureを呼びます。
+
+　以下をファイル 【リンク：sample/sample.groovy】として保存したとします。
+　groovyコマンドで実行すると assertに成功します。
+
+----- コード -----
+@GrabResolver(name = 'longfish801 github repositry', root = 'https://longfish801.github.io/maven/')
+@Grab('io.github.longfish801:clmap:0.1.00')
+@GrabExclude('org.codehaus.groovy:groovy-all')
+
+import io.github.longfish801.clmap.Clmap;
+
+Clmap clmap = new Clmap(new File('sample.tpac'));
+
+assert 'Hello, World!' == clmap.cl('map1').call('World');
+assert 'Hello, world!' == clmap.cl('map1#key1').call('World');
+assert 'Hello, WORLD!' == clmap.cl('map1#key2').call('World');
+assert 'HELLO, WORLD!' == clmap.cl('map1#key3').call('DUMMY');
+----- コード -----
+
+■宣言
+
+　先頭に宣言をひとつ持ちます。
+　タグ名は「clmap」です。
+　スペース区切りで任意の名前を付与してください。名前は省略可です。
+
+----- コード -----
+#! clmap テスト
+----- コード -----
+
+■mapとclosure
+
+　親要素として mapを複数指定できます。
+　mapには名前を付与してください。ひとつだけ省略可です。
+
+　mapにはひとつだけ子要素 argsを指定します。
+　argsにはクロージャの引数を指定します。引数が無い場合は省略できます。
+　引数には暗黙で最後に Clmap clmap, ConfigObject configを付与します。
+　変数clmapで、同じクロージャマップに定義された他のクロージャを呼ぶことができます。
+　変数configで、クロージャ間の値の受け渡しができます。
+
+　mapには複数の closureを定義できます。
+　ここにクロージャの処理を記述します。
+　closureには名前を指定します。ひとつだけ省略可です。
+
+　同じ mapに属するクロージャは引数の型をすべて同じにする必要があることに注意してください。
+
+■dec, prefix, suffix
+
+　親要素、子要素それぞれに dec, prefix, suffixを指定できます。
+
+　decに記述したテキストは、クロージャが開始する前の箇所に使用します。
+　たとえば import文の記述に利用してください。
+　親要素に指定した dec、子要素に指定した decの順番となります。
+
+　prefixに記述したテキストは、closureに記述した処理よりも前に付与されます。
+　子要素に指定した prefix、親要素に指定した prefixの順番となります。
+
+　suffixに記述したテキストは、closureに記述した処理よりも後に付与されます。
+　親要素に指定した suffix、子要素に指定した suffixの順番となります。
+
+　クロージャマップのサンプルを以下に示します。
+
+----- コード -----
+#! clmap テスト
+## dec
+	import org.apache.commons.lang3.StringUtils;
+## prefix
+	println 'BGN HERE';
+## suffix
+	println 'END HERE';
+
+## map map1
+# args
+	String yourName
+# dec
+	String cmnString = 'This is';
+# prefix
+	String result = '';
+# suffix
+	return result;
+
+# closure key1
+	result = StringUtils.trim("   ${cmnString} ${yourName}.   ");
+----- コード -----
+
+　上記のクロージャマップからコンビキー「map1#key1」で参照されるクロージャのコードは以下のとおりです。
+　読みやすいよう整形しています。
+
+----- コード -----
+import io.github.longfish801.clmap.Clmap;
+import org.apache.commons.lang3.StringUtils;
+
+String cmnString = 'This is';
+
+{ String yourName, Clmap clmap ->
+	println 'BGN HERE';
+	String result = '';
+	result = StringUtils.trim("   ${cmnString} ${yourName}.   ");
+	println 'END HERE';
+	return result;
+}
+----- コード -----
+
+以上

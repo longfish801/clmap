@@ -1,0 +1,26 @@
+#! clmap テスト１
+## dec
+	import org.apache.commons.lang3.StringUtils;
+
+## map map1
+# args
+	String arg
+
+# closure
+	return StringUtils.trim("   This is ${arg} default.   ");
+
+# closure key1
+	return StringUtils.trim("   This is ${arg} key1.   ");
+
+# closure key2
+	return StringUtils.trim("   This is ${arg} key2.   ");
+
+## map map2
+# args
+	String arg
+
+# closure
+	return StringUtils.trim("   This is ${arg} default2.   ");
+
+# closure key3
+	return StringUtils.trim("   This is ${arg} key3.   ");
