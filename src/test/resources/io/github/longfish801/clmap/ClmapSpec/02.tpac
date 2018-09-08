@@ -1,0 +1,15 @@
+#! clmap
+
+#> map map1
+#>> closure
+	return 'hello10';
+#>> closure key1
+	return 'hello11';
+#>> closure key2
+	return 'hello12';
+
+#> map map2
+#>> closure
+	return 'hello20';
+#>> closure key3
+	return 'hello23';

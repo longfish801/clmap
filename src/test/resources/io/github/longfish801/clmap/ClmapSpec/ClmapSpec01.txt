@@ -1,9 +1,0 @@
-	import org.apache.commons.lang3.StringUtils;
-	String cmnString = 'This is';
-{ 	String yourName, io.github.longfish801.clmap.Clmap clmap, groovy.util.ConfigObject config ->
-	println 'BGN HERE';
-	String result = '';
-	result = StringUtils.trim("   ${cmnString} ${yourName}.   ");
-	println 'END HERE';
-	return result;
-}

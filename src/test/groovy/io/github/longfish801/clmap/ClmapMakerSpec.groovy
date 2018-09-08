@@ -6,69 +6,78 @@
 package io.github.longfish801.clmap;
 
 import groovy.util.logging.Slf4j;
-import io.github.longfish801.tpac.Tpac.TpacParseException;
+import io.github.longfish801.tpac.TeaServer;
+import io.github.longfish801.tpac.element.TeaDec;
+import io.github.longfish801.tpac.element.TeaHandle;
+import io.github.longfish801.tpac.TeaServerParseException;
+import spock.lang.Shared;
 import spock.lang.Specification;
 
 /**
  * ClmapMakerのテスト。
- * 
  * @version 1.0.00 2017/07/12
  * @author io.github.longfish801
  */
 @Slf4j('LOG')
 class ClmapMakerSpec extends Specification {
-	def '可変長引数のクロージャを実行します'(){
+	/** TeaServer */
+	@Shared TeaServer server;
+	
+	def setup(){
+		server = new ClmapServer();
+	}
+	
+	def 'TeaDecインスタンスを生成します。'(){
 		given:
-		Clmap clmap = null;
+		String source;
+		TeaDec dec;
 		
 		when:
-		clmap = new Clmap('''\
-			#! nosuchtag
-			## map
-			# closure
-			'Hello!'
-			'''.stripIndent());
-		then:
-		thrown(TpacParseException);
-		
-		when:
-		clmap = new Clmap('''\
+		source = '''\
 			#! clmap
-			## nosuchtag
-			# closure
-			'Hello!'
-			'''.stripIndent());
+			'''.stripIndent();
+		server.soak(source);
+		dec = server['clmap:'];
 		then:
-		thrown(TpacParseException);
+		dec instanceof Clmap;
+	}
+	
+	def 'TeaHandleインスタンスを生成します。'(){
+		given:
+		String source;
+		TeaHandle closHndle;
+		TeaServerParseException exc;
 		
 		when:
-		clmap = new Clmap('''\
+		source = '''\
 			#! clmap
-			## dec 名前
-			# closure
-			'Hello!'
-			'''.stripIndent());
+			#> map
+			#>> closure
+				println 'Hello World!';
+			'''.stripIndent();
+		server.soak(source);
+		closHndle = server.path('/clmap:/map:/closure:');
 		then:
-		thrown(TpacParseException);
+		closHndle instanceof Clinfo;
 		
 		when:
-		clmap = new Clmap('''\
-			#! clmap
-			## map
-			# nosuchtag
-			'Hello!'
-			'''.stripIndent());
+		source = '''\
+			#! clmap nosuch
+			#> nosuchtag nosuchname
+			'''.stripIndent();
+		server.soak(source);
 		then:
-		thrown(TpacParseException);
+		exc = thrown(TeaServerParseException);
+		exc.message == 'tpac文書の構築が記述誤りのため失敗しました。lineNo=2 line=#> nosuchtag nosuchname'
 		
 		when:
-		clmap = new Clmap('''\
-			#! clmap
-			## map
-			# dec 名前
-			'Hello!'
-			'''.stripIndent());
+		source = '''\
+			#! clmap invalid
+			#> args
+			'''.stripIndent();
+		server.soak(source);
 		then:
-		thrown(TpacParseException);
+		exc = thrown(TeaServerParseException);
+		exc.message == 'tpac文書の構築が記述誤りのため失敗しました。lineNo=2 line=#> args'
 	}
 }
