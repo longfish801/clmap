@@ -91,4 +91,16 @@ class ClinfoSpec extends Specification {
 		then:
 		result == expected;
 	}
+	
+	def 'プロパティを設定します'(){
+		given:
+		server.soak(new File(testDir, '04.tpac'));
+		Clinfo clinfo;
+		
+		when:
+		clinfo = server['clmap:'].cl('#hello');
+		clinfo.properties['name'] = 'Mike';
+		then:
+		clinfo.call() == 'Hello, Mike!';
+	}
 }
