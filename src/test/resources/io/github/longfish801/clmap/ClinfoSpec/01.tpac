@@ -1,20 +1,18 @@
 #! clmap テスト
-## dec
+#> dec
 	import org.apache.commons.lang3.StringUtils;
-## prefix
+#> prefix
 	println 'BGN HERE';
-## suffix
+#> suffix
 	println 'END HERE';
-
-## map map1
-# args
+#> map map1
+#>> args
 	String yourName
-# dec
+#>> dec
 	String cmnString = 'This is';
-# prefix
+#>> prefix
 	String result = '';
-# suffix
+#>> suffix
 	return result;
-
-# closure key1
+#>> closure key1
 	result = StringUtils.trim("   ${cmnString} ${yourName}.   ");

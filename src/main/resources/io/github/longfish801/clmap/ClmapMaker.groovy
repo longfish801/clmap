@@ -1,9 +1,7 @@
-validTags {
-	dec = 'clmap'
-	parent = [ 'map', 'dec', 'prefix', 'suffix' ]
-	child = [ 'closure', 'args', 'dec', 'prefix', 'suffix' ]
-}
-nonameTags {
-	parent = [ 'dec', 'prefix', 'suffix' ]
-	child = [ 'args', 'dec', 'prefix', 'suffix' ]
+check {
+	valid = [ 'map', 'dec', 'prefix', 'suffix', 'closure', 'args', 'dec', 'prefix', 'suffix' ];
+	hierarchy = [
+		'clmap': [ 'map', 'dec', 'prefix', 'suffix' ],
+		'map': [ 'closure', 'args', 'dec', 'prefix', 'suffix' ]
+	]
 }

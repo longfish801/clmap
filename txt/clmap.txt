@@ -1,14 +1,14 @@
 
-【＃タイトル】Clmap記法
+【＃タイトル】clmap記法
 
 ■概要
 
-　Clmap記法はクロージャマップを定義するための記法です。
+　clmap記法はクロージャマップを定義するための記法です。
 　クロージャマップは複数のクロージャをまとめたものです。
 　引数と戻り値のインタフェースが同じクロージャをまとめて定義するのに適しています。
 
 　名称はクロージャ（Closure）のマップ（Map）に由来しています。
-　文法は【リンク：TPAC記法：tpac.html】がベースとなっています。
+　文法は【リンク：tpac記法：/gitdoc/tpac/tpac.html】がベースとなっています。
 
 ■サンプル
 
@@ -17,25 +17,25 @@
 
 ----- コード -----
 #! clmap テスト
-## map map1
-# args
+#> map map1
+#>> args
 	String yourName
 
-# closure
+#>> closure
 	return "Hello, ${yourName}!";
 
-# closure key1
+#>> closure key1
 	return clmap.cl('map1').call(yourName.toLowerCase());
 
-# closure key2
+#>> closure key2
 	config.msg = 'HELLO, WORLD!';
 	return clmap.cl('map1#nosuchKey').call(yourName.toUpperCase());
 
-# closure key3
+#>> closure key3
 	return config.msg;
 ----- コード -----
 
-　クロージャの実行には【リンク：Clmap：/clmap/groovydoc/io/github/longfish801/clmap/Clmap.html】クラスを利用します。
+　クロージャの実行には【リンク：Clmap：/clmap/groovydoc/io/github/longfish801/clmap/clmap.html】クラスを利用します。
 　map, closureそれぞれの名称を半角シャープ(#)でつないだコンビキーでクロージャを呼びます。
 　map名のみ、あるいは closureの名前が存在しない場合は、名前を省略した closureを呼びます。
 
@@ -47,9 +47,9 @@
 @Grab('io.github.longfish801:clmap:0.1.00')
 @GrabExclude('org.codehaus.groovy:groovy-all')
 
-import io.github.longfish801.clmap.Clmap;
+import io.github.longfish801.clmap.clmap;
 
-Clmap clmap = new Clmap(new File('sample.tpac'));
+clmap clmap = new clmap(new File('sample.tpac'));
 
 assert 'Hello, World!' == clmap.cl('map1').call('World');
 assert 'Hello, world!' == clmap.cl('map1#key1').call('World');
@@ -74,7 +74,7 @@ assert 'HELLO, WORLD!' == clmap.cl('map1#key3').call('DUMMY');
 
 　mapにはひとつだけ子要素 argsを指定します。
 　argsにはクロージャの引数を指定します。引数が無い場合は省略できます。
-　引数には暗黙で最後に Clmap clmap, ConfigObject configを付与します。
+　引数には暗黙で最後に clmap clmap, ConfigObject configを付与します。
 　変数clmapで、同じクロージャマップに定義された他のクロージャを呼ぶことができます。
 　変数configで、クロージャ間の値の受け渡しができます。
 
@@ -102,24 +102,24 @@ assert 'HELLO, WORLD!' == clmap.cl('map1#key3').call('DUMMY');
 
 ----- コード -----
 #! clmap テスト
-## dec
+#> dec
 	import org.apache.commons.lang3.StringUtils;
-## prefix
+#> prefix
 	println 'BGN HERE';
-## suffix
+#> suffix
 	println 'END HERE';
 
-## map map1
-# args
+#> map map1
+#>> args
 	String yourName
-# dec
+#>> dec
 	String cmnString = 'This is';
-# prefix
+#>> prefix
 	String result = '';
-# suffix
+#>> suffix
 	return result;
 
-# closure key1
+#>> closure key1
 	result = StringUtils.trim("   ${cmnString} ${yourName}.   ");
 ----- コード -----
 
@@ -127,12 +127,12 @@ assert 'HELLO, WORLD!' == clmap.cl('map1#key3').call('DUMMY');
 　読みやすいよう整形しています。
 
 ----- コード -----
-import io.github.longfish801.clmap.Clmap;
+import io.github.longfish801.clmap.clmap;
 import org.apache.commons.lang3.StringUtils;
 
 String cmnString = 'This is';
 
-{ String yourName, Clmap clmap ->
+{ String yourName, clmap clmap ->
 	println 'BGN HERE';
 	String result = '';
 	result = StringUtils.trim("   ${cmnString} ${yourName}.   ");

@@ -8,7 +8,7 @@
 
 ■ドキュメント
 
-・【リンク：Clmap記法：clmap.html】
+・【リンク：clmap記法：clmap.html】
 
 ■API仕様書
 
