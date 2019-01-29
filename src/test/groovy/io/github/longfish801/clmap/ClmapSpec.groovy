@@ -29,13 +29,20 @@ class ClmapSpec extends Specification {
 	
 	def 'コンビキー文字列に対応するクロージャ情報を返します。'(){
 		given:
-		Clmap clmap;
-		
-		when:
 		server.soak(new File(testDir, '01.tpac'));
-		clmap = server['clmap:テスト'];
-		then:
+		Clmap clmap = server['clmap:テスト'];
+		
+		expect:
 		clmap.cl('map1#key1').call('World') == 'This is World.';
+	}
+	
+	def 'クロージャ名に対応するクロージャ情報がなければクロージャ名が空文字のクロージャ情報を取得すること。'(){
+		given:
+		server.soak(new File(testDir, '01.tpac'));
+		Clmap clmap = server['clmap:テスト'];
+		
+		expect: ''
+		clmap.cl('map1#nosuchkey').call('World') == 'This is World!';
 	}
 	
 	def 'マップ名の一覧を返します。'(){
@@ -60,5 +67,18 @@ class ClmapSpec extends Specification {
 		clmap.getClosureNames('map1') == [ '', 'key1', 'key2' ];
 		clmap.getClosureNames('map2') == [ '', 'key3' ];
 		clmap.getClosureNames('noSuchMap') == [ ];
+	}
+	
+	def 'プロパティを設定します'(){
+		given:
+		Clmap clmap;
+		
+		when:
+		server.soak(new File(testDir, '03.tpac'));
+		clmap = server['clmap:'];
+		clmap.properties['name'] = 'Mike';
+		then:
+		clmap.cl('#hello').call() == 'Hello, Mike!';
+		clmap.cl('#bye').call() == 'Hello, Mike! and Good-bye!';
 	}
 }

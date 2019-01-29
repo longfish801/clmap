@@ -29,8 +29,6 @@ class Clinfo implements TeaHandle {
 	String code;
 	/** クロージャ */
 	Closure closure;
-	/** プロパティ */
-	Map properties = [:];
 	
 	/**
 	 * このクロージャ情報のコンビキーを返します。
@@ -73,10 +71,8 @@ class Clinfo implements TeaHandle {
 		}
 		try {
 			closure = shell.evaluate(code, String.format(cnstClinfo.format.clname, combiKey));
-			properties['clmap'] = upper.upper as Clmap;
-			for (String key : properties.keySet()) {
-				closure.setProperty(key, properties[key])
-			}
+			Clmap clmap = upper.upper as Clmap;
+			clmap.properties.each { closure.setProperty(it.key, it.value) }
 		} catch (Throwable exc){
 			LOG.warn("クロージャのコンパイルに失敗しました。 combiKey={}, code=\n{}\n-----", combiKey, TextUtil.addLineNo(code));
 			throw exc;

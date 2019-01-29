@@ -16,10 +16,14 @@ import io.github.longfish801.tpac.element.TeaDec;
  */
 @Slf4j('LOG')
 class Clmap implements TeaDec {
+	/** 各クロージャの大域変数として使用するプロパティ */
+	Map properties = ['clmap': this];
+	
 	/**
 	 * コンビキー文字列に対応するクロージャ情報を返します。<br/>
 	 * コンビキーはマップ名とクロージャ名を半角シャープ(#)で連結した文字列です。<br/>
-	 * 半角シャープが存在しない場合はマップ名のみ指定（クロージャ名は空文字）扱いとします。
+	 * 半角シャープが存在しない場合はマップ名のみ指定（クロージャ名は空文字）扱いとします。<br/>
+	 * クロージャ名に該当するクロージャが存在しない場合、クロージャ名が空文字のクロージャ情報を返します。
 	 * @param combiKey コンビキー文字列
 	 * @return クロージャ情報（存在しない場合はnull）
 	 */
@@ -28,7 +32,8 @@ class Clmap implements TeaDec {
 		int divIdx = combiKey.indexOf('#');
 		String mapName = (divIdx < 0)? combiKey : combiKey.substring(0, divIdx);
 		String clName = (divIdx < 0)? '' : combiKey.substring(divIdx + 1);
-		return lowers["map:${mapName}"]?.lowers["closure:${clName}"];
+		Clinfo clinfo = lowers["map:${mapName}"]?.lowers["closure:${clName}"];
+		return (clinfo == null && !clName.empty)? lowers["map:${mapName}"]?.lowers['closure:'] : clinfo;
 	}
 	
 	/**

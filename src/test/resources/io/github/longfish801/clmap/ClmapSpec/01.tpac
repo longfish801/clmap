@@ -16,5 +16,7 @@
 #>> suffix
 	return result;
 
+#>> closure
+	result = "${cmnString} ${yourName}!";
 #>> closure key1
 	result = StringUtils.trim("   ${cmnString} ${yourName}.   ");
