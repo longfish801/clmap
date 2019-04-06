@@ -8,14 +8,14 @@
 　引数と戻り値のインタフェースが同じクロージャをまとめて定義するのに適しています。
 
 　名称はクロージャ（Closure）のマップ（Map）に由来しています。
-　文法は【リンク：tpac記法：/gitdoc/tpac/tpac.html】がベースとなっています。
+　文法は【リンク：tpac記法：/tpac/tpac.html】がベースとなっています。
 
 ■サンプル
 
 　クロージャマップのサンプルを以下に示します。
 　上記の内容をファイル 【リンク：sample/sample.tpac】に保存したとします。
 
------ コード -----
+-----
 #! clmap テスト
 #> map map1
 #>> args
@@ -33,7 +33,7 @@
 
 #>> closure key3
 	return config.msg;
------ コード -----
+-----
 
 　クロージャの実行には【リンク：Clmap：/clmap/groovydoc/io/github/longfish801/clmap/clmap.html】クラスを利用します。
 　map, closureそれぞれの名称を半角シャープ(#)でつないだコンビキーでクロージャを呼びます。
@@ -42,7 +42,7 @@
 　以下をファイル 【リンク：sample/sample.groovy】として保存したとします。
 　groovyコマンドで実行すると assertに成功します。
 
------ コード -----
+-----
 @GrabResolver(name = 'longfish801 github repositry', root = 'https://longfish801.github.io/maven/')
 @Grab('io.github.longfish801:clmap:0.1.00')
 @GrabExclude('org.codehaus.groovy:groovy-all')
@@ -55,7 +55,7 @@ assert 'Hello, World!' == clmap.cl('map1').call('World');
 assert 'Hello, world!' == clmap.cl('map1#key1').call('World');
 assert 'Hello, WORLD!' == clmap.cl('map1#key2').call('World');
 assert 'HELLO, WORLD!' == clmap.cl('map1#key3').call('DUMMY');
------ コード -----
+-----
 
 ■宣言
 
@@ -63,9 +63,9 @@ assert 'HELLO, WORLD!' == clmap.cl('map1#key3').call('DUMMY');
 　タグ名は「clmap」です。
 　スペース区切りで任意の名前を付与してください。名前は省略可です。
 
------ コード -----
+-----
 #! clmap テスト
------ コード -----
+-----
 
 ■mapとclosure
 
@@ -100,7 +100,7 @@ assert 'HELLO, WORLD!' == clmap.cl('map1#key3').call('DUMMY');
 
 　クロージャマップのサンプルを以下に示します。
 
------ コード -----
+-----
 #! clmap テスト
 #> dec
 	import org.apache.commons.lang3.StringUtils;
@@ -121,12 +121,12 @@ assert 'HELLO, WORLD!' == clmap.cl('map1#key3').call('DUMMY');
 
 #>> closure key1
 	result = StringUtils.trim("   ${cmnString} ${yourName}.   ");
------ コード -----
+-----
 
 　上記のクロージャマップからコンビキー「map1#key1」で参照されるクロージャのコードは以下のとおりです。
 　読みやすいよう整形しています。
 
------ コード -----
+-----
 import io.github.longfish801.clmap.clmap;
 import org.apache.commons.lang3.StringUtils;
 
@@ -139,6 +139,6 @@ String cmnString = 'This is';
 	println 'END HERE';
 	return result;
 }
------ コード -----
+-----
 
 以上
