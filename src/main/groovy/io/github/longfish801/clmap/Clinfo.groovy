@@ -61,7 +61,8 @@ class Clinfo implements TeaHandle {
 	/**
 	 * クロージャを生成します。<br/>
 	 * ソースコードを初めて生成したときは DEBUGログに出力します。<br/>
-	 * コンパイル時に Throwableをキャッチしたならば WARNログを出力します。
+	 * コンパイル時に Throwableをキャッチしたならば WARNログを出力します。<br/>
+	 * クロージャ生成時、Clmapクラスのメンバ変数 propertiesを delegateに設定します。
 	 * @return クロージャ
 	 */
 	Closure createClosure(){
@@ -72,7 +73,7 @@ class Clinfo implements TeaHandle {
 		try {
 			closure = shell.evaluate(code, String.format(cnstClinfo.format.clname, combiKey));
 			Clmap clmap = upper.upper as Clmap;
-			clmap.properties.each { closure.setProperty(it.key, it.value) }
+			closure.delegate = clmap.properties;
 		} catch (Throwable exc){
 			LOG.warn("クロージャのコンパイルに失敗しました。 combiKey={}, code=\n{}\n-----", combiKey, TextUtil.addLineNo(code));
 			throw exc;
