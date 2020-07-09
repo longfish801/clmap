@@ -1,8 +1,0 @@
-#! clmap
-
-#> map
-#>> closure hello
-	return "Hello, ${name}!";
-#>> closure bye
-	return "${clmap.cl('#hello').call()} and Good-bye!";
-

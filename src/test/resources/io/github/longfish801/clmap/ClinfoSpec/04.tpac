@@ -1,6 +1,0 @@
-#! clmap
-
-#> map
-#>> closure hello
-	return "Hello, ${name}!";
-
