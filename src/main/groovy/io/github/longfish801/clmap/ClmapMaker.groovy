@@ -3,45 +3,58 @@
  *
  * Copyright (C) io.github.longfish801 All Rights Reserved.
  */
-package io.github.longfish801.clmap;
+package io.github.longfish801.clmap
 
-import groovy.util.logging.Slf4j;
-import io.github.longfish801.shared.ExchangeResource;
-import io.github.longfish801.tpac.element.TeaDec;
-import io.github.longfish801.tpac.element.TeaHandle;
-import io.github.longfish801.tpac.parser.TeaMaker;
-import io.github.longfish801.tpac.parser.TeaMakerMakeException;
+import io.github.longfish801.clmap.ClmapConst as cnst
+import io.github.longfish801.clmap.ClmapMsg as msgs
+import io.github.longfish801.tpac.TpacSemanticException
+import io.github.longfish801.tpac.tea.TeaDec
+import io.github.longfish801.tpac.tea.TeaHandle
+import io.github.longfish801.tpac.tea.TeaMaker
 
 /**
  * clmap記法の文字列の解析にともない、各要素を生成します。
- * @version 1.0.00 2017/07/11
+ * @version 0.3.00 2020/06/11
  * @author io.github.longfish801
  */
-@Slf4j('LOG')
 class ClmapMaker implements TeaMaker {
-	/** ConfigObject */
-	static final ConfigObject cnstClmapMaker = ExchangeResource.config(ClmapMaker.class);
-	
 	/**
-	 * TeaDecインスタンスを生成します。
+	 * 宣言を生成します。<br/>
+	 * {@link Clmap}インスタンスを生成して返します。
 	 * @param tag タグ
 	 * @param name 名前
-	 * @return TeaDec
+	 * @return 宣言
 	 */
+	@Override
 	TeaDec newTeaDec(String tag, String name){
-		return new Clmap();
+		return new Clmap()
 	}
 	
 	/**
-	 * TeaHandleインスタンスを生成します。
+	 * ハンドルを生成します。<br/>
+	 * closureタグに対し {@link ClmapClosure}のインスタンスを生成して返します。<br/>
+	 * mapタグに対し {@link ClmapMap}のインスタンスを生成して返します。<br/>
+	 * それ以外はオーバーライド元のメソッドの戻り値を返します。
 	 * @param tag タグ
 	 * @param name 名前
 	 * @param upper 上位ハンドル
-	 * @return TeaHandle
+	 * @return ハンドル
+	 * @exception TpacSemanticException 統語的にありえないタグです。
+	 * @exception TpacSemanticException タグの親子関係が不正です。
 	 */
+	@Override
 	TeaHandle newTeaHandle(String tag, String name, TeaHandle upper){
-		if (!cnstClmapMaker.check.valid.contains(tag)) throw new TeaMakerMakeException("不正なタグ名です。tag=${tag}, name=${name}");
-		if (!cnstClmapMaker.check.hierarchy[upper.tag].contains(tag)) throw new TeaMakerMakeException("タグの親子関係が不正です。tag=${tag}, name=${name}, upper=${upper.tag}");
-		return (tag == 'closure')? new Clinfo() : TeaMaker.super.newTeaHandle(tag, name, upper);
+		if (!cnst.validtags.contains(tag)){
+			throw new TpacSemanticException(String.format(msgs.exc.invalidTag, tag))
+		}
+		if (cnst.hierarchy.get(upper.tag) != null
+		 && !cnst.hierarchy.get(upper.tag).contains(tag)){
+			throw new TpacSemanticException(String.format(msgs.exc.invalidHierarchy, tag, upper.tag))
+		}
+		switch (tag) {
+			case cnst.tags.closure: return new ClmapClosure()
+			case cnst.tags.map: return new ClmapMap()
+		}
+		return TeaMaker.super.newTeaHandle(tag, name, upper)
 	}
 }

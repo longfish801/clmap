@@ -1,0 +1,13 @@
+#! clmap
+#> map
+#>> args
+	String yourName
+#>> closure
+	return "Hello, ${yourName}!"
+#>> closure:key1
+	return clmap.cl('#_').call(yourName.toLowerCase())
+#>> closure:key2
+	config.msg = 'HELLO, WORLD!'
+	return clmap.cl('#_').call(yourName.toUpperCase())
+#>> closure:key3
+	return config.msg

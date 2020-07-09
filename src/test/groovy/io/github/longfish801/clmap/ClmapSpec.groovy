@@ -3,82 +3,51 @@
  *
  * Copyright (C) io.github.longfish801 All Rights Reserved.
  */
-package io.github.longfish801.clmap;
+package io.github.longfish801.clmap
 
-import groovy.util.logging.Slf4j;
-import io.github.longfish801.shared.PackageDirectory;
-import io.github.longfish801.tpac.TeaServer;
-import spock.lang.Shared;
-import spock.lang.Specification;
+import io.github.longfish801.clmap.ClmapMsg as msgs
+import io.github.longfish801.tpac.TpacHandlingException
+import spock.lang.Specification
+import spock.lang.Unroll
 
 /**
  * Clmapのテスト。
- * @version 1.0.00 2016/11/30
+ * @version 0.3.00 2020/06/11
  * @author io.github.longfish801
  */
-@Slf4j('LOG')
 class ClmapSpec extends Specification {
-	/** ファイル入出力のテスト用フォルダ */
-	static final File testDir = PackageDirectory.deepDir('src/test/resources', ClmapSpec.class);
-	/** TeaServer */
-	@Shared TeaServer server;
-	
-	def setup(){
-		server = new ClmapServer();
-	}
-	
-	def 'コンビキー文字列に対応するクロージャ情報を返します。'(){
+	@Unroll
+	def 'cl'(){
 		given:
-		server.soak(new File(testDir, '01.tpac'));
-		Clmap clmap = server['clmap:テスト'];
+		ClmapServer server = new ClmapServer()
+		Clmap clmap = new Clmap(tag: 'clmap', name: 'dec1')
+		ClmapMap map = new ClmapMap(tag: 'map')
+		ClmapMap map1 = new ClmapMap(tag: 'map', name: 'map1')
+		ClmapMap map11 = new ClmapMap(tag: 'map', name: 'map11')
+		server << clmap
+		clmap << map
+		clmap << map1
+		map1 << map11
 		
 		expect:
-		clmap.cl('map1#key1').call('World') == 'This is World.';
-	}
-	
-	def 'クロージャ名に対応するクロージャ情報がなければクロージャ名が空文字のクロージャ情報を取得すること。'(){
-		given:
-		server.soak(new File(testDir, '01.tpac'));
-		Clmap clmap = server['clmap:テスト'];
+		clmap.cl(clpath) == server.solvePath(path)
 		
-		expect: ''
-		clmap.cl('map1#nosuchkey').call('World') == 'This is World!';
+		where:
+		clpath			|| path
+		'/dec1'			|| '/clmap:dec1'
+		'_'				|| '/clmap:dec1/map'
+		'map1'			|| '/clmap:dec1/map:map1'
+		'map1/map11'	|| '/clmap:dec1/map:map1/map:map11'
 	}
 	
-	def 'マップ名の一覧を返します。'(){
+	def 'cl - exception'(){
 		given:
-		Clmap clmap;
+		TpacHandlingException exc
 		
 		when:
-		server.soak(new File(testDir, '02.tpac'));
-		clmap = server['clmap:'];
+		new Clmap(tag: 'clmap', name: 'dec1').cl('dec1#cl1/map1')
 		then:
-		clmap.mapNames == [ 'map1', 'map2' ];
-	}
-	
-	def '指定されたマップ配下のクロージャ名の一覧を返します'(){
-		given:
-		Clmap clmap;
-		
-		when:
-		server.soak(new File(testDir, '02.tpac'));
-		clmap = server['clmap:'];
-		then:
-		clmap.getClosureNames('map1') == [ '', 'key1', 'key2' ];
-		clmap.getClosureNames('map2') == [ '', 'key3' ];
-		clmap.getClosureNames('noSuchMap') == [ ];
-	}
-	
-	def 'プロパティを設定します'(){
-		given:
-		Clmap clmap;
-		
-		when:
-		server.soak(new File(testDir, '03.tpac'));
-		clmap = server['clmap:'];
-		clmap.properties['name'] = 'Mike';
-		then:
-		clmap.cl('#hello').call() == 'Hello, Mike!';
-		clmap.cl('#bye').call() == 'Hello, Mike! and Good-bye!';
+		exc = thrown(TpacHandlingException)
+		exc.message == String.format(msgs.exc.invalidClpath, 'dec1#cl1/map1')
 	}
 }

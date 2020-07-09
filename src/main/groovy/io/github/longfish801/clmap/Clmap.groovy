@@ -3,55 +3,51 @@
  *
  * Copyright (C) io.github.longfish801 All Rights Reserved.
  */
-package io.github.longfish801.clmap;
+package io.github.longfish801.clmap
 
-import groovy.util.logging.Slf4j;
-import io.github.longfish801.shared.ArgmentChecker;
-import io.github.longfish801.tpac.element.TeaDec;
+import io.github.longfish801.clmap.ClmapConst as cnst
+import io.github.longfish801.clmap.ClmapMsg as msgs
+import io.github.longfish801.tpac.TpacConst as tpacCnst
+import io.github.longfish801.tpac.TpacHandlingException
+import io.github.longfish801.tpac.tea.TeaDec
+import java.util.regex.Matcher
 
 /**
- * クロージャマップです。
- * @version 1.0.00 2016/11/29
+ * 宣言です。
+ * @version 0.3.00 2020/06/11
  * @author io.github.longfish801
  */
-@Slf4j('LOG')
 class Clmap implements TeaDec {
-	/** 各クロージャの大域変数として使用するプロパティ */
-	Map properties = ['clmap': this];
-	
 	/**
-	 * コンビキー文字列に対応するクロージャ情報を返します。<br/>
-	 * コンビキーはマップ名とクロージャ名を半角シャープ(#)で連結した文字列です。<br/>
-	 * 半角シャープが存在しない場合はマップ名のみ指定（クロージャ名は空文字）扱いとします。<br/>
-	 * クロージャ名に該当するクロージャが存在しない場合、クロージャ名が空文字のクロージャ情報を返します。
-	 * @param combiKey コンビキー文字列
-	 * @return クロージャ情報（存在しない場合はnull）
+	 * クロージャパスの参照対象を返します。<br/>
+	 * 絶対パスの場合はサーバーに解決を依頼します。<br/>
+	 * 相対パスの場合、パス区切り文字で分割した先頭の名前と、残りのパスに分割します。<br/>
+	 * このとき、統語的にありえないパスの場合は例外を投げます。<br/>
+	 * 先頭の要素にマップ名とクロージャ名がある場合、マップ名を先頭の要素に、クロージャ名を残りのパスに分割します。<br/>
+	 * 残りのパスがなければ、名前が一致する下位のマップを返します。<br/>
+	 * 残りのパスがあれば、それを新たなパスとして名前が一致する下位のマップに依頼します。<br/>
+	 * 上記で該当するハンドルがなければ nullを返します。
+	 * @param clpath クロージャパス
+	 * @return クロージャパスの参照対象（存在しない場合はnull）
+	 * @exception TpacHandlingException 統語的にありえないクロージャパスです
 	 */
-	Clinfo cl(String combiKey){
-		ArgmentChecker.checkMatchRex('コンビキー', combiKey, /[^ \/:]*/);
-		int divIdx = combiKey.indexOf('#');
-		String mapName = (divIdx < 0)? combiKey : combiKey.substring(0, divIdx);
-		String clName = (divIdx < 0)? '' : combiKey.substring(divIdx + 1);
-		Clinfo clinfo = lowers["map:${mapName}"]?.lowers["closure:${clName}"];
-		return (clinfo == null && !clName.empty)? lowers["map:${mapName}"]?.lowers['closure:'] : clinfo;
-	}
-	
-	/**
-	 * マップ名の一覧を返します。
-	 * @return マップ名の一覧
-	 */
-	List getMapNames(){
-		return findAll(/map:.*/).collect { it.name };
-	}
-	
-	/**
-	 * 指定されたマップ配下のクロージャ名の一覧を返します。<br>
-	 * 該当するマップが無い場合は空リストを返します。
-	 * @param mapName マップ名
-	 * @return クロージャ名の一覧
-	 */
-	List getClosureNames(String mapName){
-		ArgmentChecker.checkNotNull('マップ名', mapName);
-		return lowers["map:${mapName}"]?.findAll(/closure:.*/)?.collect { it.name } ?: [];
+	def cl(String clpath){
+		// 絶対パスの場合はサーバーに解決を依頼します
+		if (clpath.startsWith(cnst.clpath.level)) return server.cl(clpath)
+		// パス区切り文字で分割した先頭の要素を解決します
+		if (cnst.clpath.fordec.every { !(clpath ==~ it) }){
+			throw new TpacHandlingException(String.format(msgs.exc.invalidClpath, clpath))
+		}
+		Matcher matcher = Matcher.lastMatcher
+		String firstPath = matcher.group(1)
+		String otherPath = (matcher.groupCount() >= 2)? matcher.group(2) : ''
+		// 先頭の要素にマップ名とクロージャ名がある場合、マップ名を先頭の要素に、クロージャ名を残りのパスに分割します
+		if (otherPath.empty && firstPath ==~ cnst.clpath.closures){
+			matcher = Matcher.lastMatcher
+			firstPath = matcher.group(1)
+			otherPath = cnst.clpath.anchor + matcher.group(2)
+		}
+		def lower = solvePath("${cnst.tags.map}${tpacCnst.path.keyDiv}${firstPath}")
+		return (otherPath.empty)? lower : lower?.cl(otherPath)
 	}
 }

@@ -1,5 +1,5 @@
 /**
- * クロージャマップの参照／実行のためのパッケージです。
+ * clmap文書を扱うためのパッケージです。
  * @author io.github.longfish801
  */
-package io.github.longfish801.clmap;
+package io.github.longfish801.clmap

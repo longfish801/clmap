@@ -3,81 +3,62 @@
  *
  * Copyright (C) io.github.longfish801 All Rights Reserved.
  */
-package io.github.longfish801.clmap;
+package io.github.longfish801.clmap
 
-import groovy.util.logging.Slf4j;
-import io.github.longfish801.tpac.TeaServer;
-import io.github.longfish801.tpac.element.TeaDec;
-import io.github.longfish801.tpac.element.TeaHandle;
-import io.github.longfish801.tpac.TeaServerParseException;
-import spock.lang.Shared;
-import spock.lang.Specification;
+import io.github.longfish801.clmap.ClmapMsg as msgs
+import io.github.longfish801.tpac.TpacHandle
+import io.github.longfish801.tpac.TpacSemanticException
+import spock.lang.Shared
+import spock.lang.Specification
+import spock.lang.Unroll
 
 /**
  * ClmapMakerのテスト。
- * @version 1.0.00 2017/07/12
+ * @version 0.3.00 2020/06/11
  * @author io.github.longfish801
  */
-@Slf4j('LOG')
 class ClmapMakerSpec extends Specification {
-	/** TeaServer */
-	@Shared TeaServer server;
+	/** ClmapMaker */
+	@Shared ClmapMaker maker
 	
 	def setup(){
-		server = new ClmapServer();
+		maker = new ClmapMaker()
 	}
 	
-	def 'TeaDecインスタンスを生成します。'(){
-		given:
-		String source;
-		TeaDec dec;
-		
-		when:
-		source = '''\
-			#! clmap
-			'''.stripIndent();
-		server.soak(source);
-		dec = server['clmap:'];
-		then:
-		dec instanceof Clmap;
+	def 'newTeaDec'(){
+		expect:
+		maker.newTeaDec('tag', 'name') instanceof Clmap
 	}
 	
-	def 'TeaHandleインスタンスを生成します。'(){
+	@Unroll
+	def 'newTeaHandle'(){
 		given:
-		String source;
-		TeaHandle closHndle;
-		TeaServerParseException exc;
+		TpacHandle upper = new TpacHandle(tag: 'map')
+		
+		expect:
+		maker.newTeaHandle(tag, '', upper).class.simpleName == classname
+		
+		where:
+		tag			|| classname
+		'closure'	|| 'ClmapClosure'
+		'map'		|| 'ClmapMap'
+		'args'		|| 'TpacHandle'
+	}
+	
+	def 'newTeaHandle - exception'(){
+		given:
+		TpacSemanticException exc
 		
 		when:
-		source = '''\
-			#! clmap
-			#> map
-			#>> closure
-				println 'Hello World!';
-			'''.stripIndent();
-		server.soak(source);
-		closHndle = server.path('/clmap:/map:/closure:');
+		maker.newTeaHandle('nosuch', '', new TpacHandle(tag: 'clmap'))
 		then:
-		closHndle instanceof Clinfo;
+		exc = thrown(TpacSemanticException)
+		exc.message == String.format(msgs.exc.invalidTag, 'nosuch')
 		
 		when:
-		source = '''\
-			#! clmap nosuch
-			#> nosuchtag nosuchname
-			'''.stripIndent();
-		server.soak(source);
+		maker.newTeaHandle('closure', '', new TpacHandle(tag: 'clmap'))
 		then:
-		exc = thrown(TeaServerParseException);
-		exc.message == 'tpac文書の構築が記述誤りのため失敗しました。lineNo=2 line=#> nosuchtag nosuchname'
-		
-		when:
-		source = '''\
-			#! clmap invalid
-			#> args
-			'''.stripIndent();
-		server.soak(source);
-		then:
-		exc = thrown(TeaServerParseException);
-		exc.message == 'tpac文書の構築が記述誤りのため失敗しました。lineNo=2 line=#> args'
+		exc = thrown(TpacSemanticException)
+		exc.message == String.format(msgs.exc.invalidHierarchy, 'closure', 'clmap')
 	}
 }
