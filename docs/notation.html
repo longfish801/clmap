@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Serif+JP:400,700&amp;subset=japanese">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+<style type="text/css">
+<!--
+body {
+	font-family: 'Helvetica Neue',Arial,'Hiragino Kaku Gothic ProN','Hiragino Sans',Meiryo,sans-serif;
+	letter-spacing: 0.05rem;
+	line-height: 2.3rem;
+	text-align: justify;
+	word-wrap: break-word;
+}
+h2 {
+	margin-top: 2rem;
+}
+div.container {
+	margin-bottom: 3rem;
+}
+pre {
+	padding: 0.5rem;
+	line-height: 1.3rem;
+	background-color: oldlace;
+}
+th, td {
+	border: solid 1px black;
+	padding: 0rem 0.5rem;
+}
+th {
+	text-align: center;
+}
+-->
+</style>
+<title> clmap記法</title>
+</head>
+<body>
+
+<div class="container">
+<div class="row justify-content-center">
+<div class="col-lg-9">
+
+<h1><a href="#clmap記法" id="clmap記法"></a>clmap記法</h1>
+<ul>
+<li><a href="#概要">概要</a></li>
+<li><a href="#宣言">宣言</a></li>
+<li><a href="#mapハンドル">mapハンドル</a></li>
+<li><a href="#closureハンドル">closureハンドル</a></li>
+<li><a href="#argsハンドル">argsハンドル</a></li>
+<li><a href="#decハンドル">decハンドル</a></li>
+<li><a href="#prefixハンドル">prefixハンドル</a></li>
+<li><a href="#suffixハンドル">suffixハンドル</a></li>
+<li><a href="#クロージャパス">クロージャパス</a></li>
+<li><a href="#生成されるコード">生成されるコード</a></li>
+</ul>
+<h2><a href="#概要" id="概要"></a>概要</h2>
+<p>　clmap記法は複数のクロージャをまとめて定義するための記法です。<br />
+　インタフェースが同じクロージャをまとめて定義できます。</p>
+<p>　clmap記法は tpacを利用したDSLです。tpacの詳細は <a href="/tpac/">tpac</a>を参照してください。<br />
+　以下、tpac記法と重複する説明は省いています。</p>
+<h2><a href="#宣言" id="宣言"></a>宣言</h2>
+<p>　宣言のタグ名は「clmap」です。<br />
+　可能な子要素は map, dec, prefix, suffixハンドルです。</p>
+<pre><code>#! clmap:sample
+</code></pre>
+<h2><a href="#mapハンドル" id="mapハンドル"></a>mapハンドル</h2>
+<p>　mapハンドルは複数のクロージャをまとめます。<br />
+　可能な子要素は map, closure, args, dec, prefix, suffixハンドルです。<br />
+　子要素のうち、map, closureハンドルは複数記述できます。省略も可能です。<br />
+　他は最大ひとつです。</p>
+<h2><a href="#closureハンドル" id="closureハンドル"></a>closureハンドル</h2>
+<p>　closureハンドルはひとつのクロージャに相当します。<br />
+　引数が無い場合は省略できます。<br />
+　デフォルトキーにテキストとしてソースコードを記述します。<br />
+　可能な子要素はありません。</p>
+<h2><a href="#argsハンドル" id="argsハンドル"></a>argsハンドル</h2>
+<p>　argsハンドルには引数を定義します。<br />
+　同じ mapハンドルに属す closureハンドルに定義されたクロージャすべてに共通する引数を定義します。<br />
+　可能な子要素はありません。</p>
+<h2><a href="#decハンドル" id="decハンドル"></a>decハンドル</h2>
+<p>　decハンドルには、クロージャの開始前の内容を記述します。<br />
+　たとえば import文の記述に利用してください。<br />
+　同じ mapハンドルに属す closureハンドル、および下位の階層にあるすべての closureハンドルに定義されたクロージャすべてに有効です。<br />
+　decハンドルが複数ある場合、階層が上位のものから順番に連結します。<br />
+　可能な子要素はありません。</p>
+<h2><a href="#prefixハンドル" id="prefixハンドル"></a>prefixハンドル</h2>
+<p>　prefixハンドルには、クロージャの引数定義後、処理開始前の内容を記述します。<br />
+　同じ mapハンドルに属す closureハンドル、および下位の階層にあるすべての closureハンドルに定義されたクロージャすべてに有効です。<br />
+　prefixハンドルが複数ある場合、階層が上位のものから順番に連結します。<br />
+　可能な子要素はありません。</p>
+<h2><a href="#suffixハンドル" id="suffixハンドル"></a>suffixハンドル</h2>
+<p>　suffixハンドルには、クロージャの処理終了後の内容を記述します。<br />
+　同じ mapハンドルに属す closureハンドル、および下位の階層にあるすべての closureハンドルに定義されたクロージャすべてに有効です。<br />
+　suffixハンドルが複数ある場合、階層が上位のものから順番に連結します。<br />
+　可能な子要素はありません。</p>
+<h2><a href="#クロージャパス" id="クロージャパス"></a>クロージャパス</h2>
+<p>　tpac文書ではハンドルを参照するとき、タグと名前を連結した文字列をパスに使います。<br />
+　clmap記法ではタグを省略したパスを使えます。便宜上、これをクロージャパスと呼びます。<br />
+　clmap宣言および mapハンドルの名前は半角スラッシュ(/)を、末尾の closureハンドルは半角シャープ(#)を区切り文字としてください。<br />
+　ひとつ上位を参照するときは半角ドット二つ(..)を使用してください。名前を省略したハンドルを指すには半角アンダーバー(_)を使用してください。<br />
+　n個のマップが階層を構成し、その下位にある closureハンドルを参照したい場合、絶対クロージャパスのフォーマットは以下となります。</p>
+<pre><code>/${clmap宣言の名前}/${mapハンドルの名前1}/ ... /${mapハンドルの名前n}#${closureハンドルの名前}
+</code></pre>
+<h2><a href="#生成されるコード" id="生成されるコード"></a>生成されるコード</h2>
+<p>　clmap文書のサンプルを以下に示します。</p>
+<pre><code>#! clmap:sample
+#&gt; dec
+	import org.apache.commons.lang3.StringUtils
+#&gt; prefix
+	println 'BGN HERE'
+#&gt; suffix
+	println 'END HERE'
+
+#&gt; map:map1
+#&gt;&gt; args
+	String yourName
+#&gt;&gt; dec
+	String cmnString = 'This is'
+#&gt;&gt; prefix
+	String result = ''
+#&gt;&gt; suffix
+	return result
+#&gt;&gt; closure:key1
+	result = StringUtils.trim(&quot;   ${cmnString} ${yourName}.   &quot;)
+</code></pre>
+<p>　上記の clmap文書からクロージャパス「/sample/map1#key1」で参照されるクロージャのコードは以下のとおりです。<br />
+　読みやすいよう整形しています。</p>
+<pre><code>import org.apache.commons.lang3.StringUtils
+
+String cmnString = 'This is'
+
+{ String yourName -&gt;
+	println 'BGN HERE'
+	String result = ''
+	result = StringUtils.trim(&quot;   ${cmnString} ${yourName}.   &quot;)
+	println 'END HERE'
+	return result
+}
+</code></pre>
+<p>以上</p>
+
+</div><!-- end of col -->
+</div><!-- end of row -->
+</div><!-- end of container -->
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+</body>
+</html>
