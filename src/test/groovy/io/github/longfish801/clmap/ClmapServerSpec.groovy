@@ -5,7 +5,6 @@
  */
 package io.github.longfish801.clmap
 
-import io.github.longfish801.clmap.ClmapConst as cnst
 import io.github.longfish801.clmap.ClmapMsg as msgs
 import io.github.longfish801.tpac.TpacHandlingException
 import io.github.longfish801.tpac.TpacMaker
@@ -39,7 +38,7 @@ class ClmapServerSpec extends Specification {
 		TeaMaker maker
 		
 		when:
-		maker = server.newMaker(cnst.tags.clmap)
+		maker = server.newMaker('clmap')
 		then:
 		maker instanceof ClmapMaker
 		

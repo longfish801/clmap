@@ -13,7 +13,7 @@
 ## 特徴
 
 * 複数のクロージャを clmap記法で定義します。
-  clmap記法は [tpac](/tpac/)を利用したDSLです。
+  clmap記法は [tpacライブラリ](/tpac/)を利用したDSLです。
 * 共通する引数や import文などをまとめて定義できます。
   共通する前処理、後処理をまとめることで依存性注入ができます。
 
@@ -25,16 +25,27 @@
 
 ```
 #! clmap
+#> data
+one
+two
+three
 #> map
 #>> args
-	String yourName
+	int idx
 #>> closure
-	return "Hello, ${yourName}!"
+	return clmap.solvePath('/clmap/data').dflt[idx]
+#> map:hello
+#>> config:messages
+hello {
+	message = 'Hello, %s!'
+}
+#>> args
+	String yourName
 #>> closure:key1
-	return clmap.cl('#_').call(yourName.toLowerCase())
+	return String.format(clmap.solvePath('config:messages').config().hello.message, yourName)
 #>> closure:key2
 	config.msg = 'HELLO, WORLD!'
-	return clmap.cl('#_').call(yourName.toUpperCase())
+	return clmap.cl('#key1').call(yourName.toLowerCase())
 #>> closure:key3
 	return config.msg
 ```
@@ -46,17 +57,17 @@ import io.github.longfish801.clmap.ClmapServer
 
 def clmap
 try {
-	clmap = new ClmapServer().soak(new File('src/test/resources/sample.tpac')).cl('/_/_')
+	clmap = new ClmapServer().soak(new File('src/test/resources/sample.tpac')).cl('/_')
 } catch (exc){
 	exc.printStackTrace()
 }
 
-clmap.properties.config = new ConfigObject()
+assert 'two' == clmap.call(1)
 
-assert 'Hello, World!' == clmap.cl('#_').call('World')
-assert 'Hello, world!' == clmap.cl('#key1').call('World')
-assert 'Hello, WORLD!' == clmap.cl('#key2').call('World')
-assert 'HELLO, WORLD!' == clmap.cl('#key3').call('DUMMY')
+clmap.cl('hello').properties.config = new ConfigObject()
+assert 'Hello, John!' == clmap.cl('hello#key1').call('John')
+assert 'Hello, john!' == clmap.cl('hello#key2').call('John')
+assert 'HELLO, WORLD!' == clmap.cl('hello#key3').call('John')
 ```
 
 　このサンプルコードは build.gradle内の execSamplesタスクで実行しています。
@@ -85,3 +96,8 @@ dependencies {
 	implementation group: 'io.github.longfish801', name: 'clmap', version: '0.3.00'
 }
 ```
+
+## 改版履歴
+
+0.3.01
+: config, dataハンドルを追加しました。

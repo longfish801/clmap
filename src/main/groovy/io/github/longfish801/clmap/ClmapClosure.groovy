@@ -8,7 +8,6 @@ package io.github.longfish801.clmap
 import groovy.util.logging.Slf4j
 import io.github.longfish801.clmap.ClmapConst as cnst
 import io.github.longfish801.clmap.ClmapMsg as msgs
-import io.github.longfish801.tpac.TpacConst as tpacCnst
 import io.github.longfish801.tpac.tea.TeaHandle
 
 /**
@@ -95,22 +94,22 @@ class ClmapClosure implements TeaHandle {
 		writeCode = { StringBuilder builder, String tag, TeaHandle hndl ->
 			if (hndl.upper != null) writeCode(builder, tag, hndl.upper)
 			if (hndl.solvePath(tag) != null){
-				builder << hndl.solvePath(tag).getAt(tpacCnst.dflt.mapKey).join(System.lineSeparator())
+				builder << hndl.solvePath(tag).dflt.join(System.lineSeparator())
 				builder << System.lineSeparator()
 			}
 		}
 		StringBuilder builder = new StringBuilder()
-		writeCode(builder, cnst.tags.dec, this)
+		writeCode(builder, 'dec', this)
 		builder << cnst.closure.bgn
-		if (upper.solvePath(cnst.tags.args) != null){
-			builder << upper.solvePath(cnst.tags.args).getAt(tpacCnst.dflt.mapKey).join(System.lineSeparator())
+		if (upper.solvePath('args') != null){
+			builder << upper.solvePath('args').dflt.join(System.lineSeparator())
 		}
 		builder << cnst.closure.arg
 		builder << System.lineSeparator()
-		writeCode(builder, cnst.tags.prefix, this)
-		builder << getAt(tpacCnst.dflt.mapKey).join(System.lineSeparator())
+		writeCode(builder, 'prefix', this)
+		builder << dflt.join(System.lineSeparator())
 		builder << System.lineSeparator()
-		writeCode(builder, cnst.tags.suffix, this)
+		writeCode(builder, 'suffix', this)
 		builder << cnst.closure.end
 		builder << System.lineSeparator()
 		return builder.toString()

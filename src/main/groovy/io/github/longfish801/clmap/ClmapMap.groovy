@@ -7,7 +7,6 @@ package io.github.longfish801.clmap
 
 import io.github.longfish801.clmap.ClmapConst as cnst
 import io.github.longfish801.clmap.ClmapMsg as msgs
-import io.github.longfish801.tpac.TpacConst as tpacCnst
 import io.github.longfish801.tpac.TpacHandlingException
 import io.github.longfish801.tpac.tea.TeaHandle
 import java.util.regex.Matcher
@@ -26,7 +25,7 @@ class ClmapMap implements TeaHandle {
 	 * 各クロージャの大域変数として使用するプロパティ。<br/>
 	 * デフォルトでキー'clmap'に対し値として自インスタンスを保持します。
 	 */
-	Map properties = ['clmap': this]
+	Map properties = [(cnst.map.dflt): this]
 	
 	/**
 	 * コンストラクタ。<br/>
@@ -68,7 +67,7 @@ class ClmapMap implements TeaHandle {
 		// クロージャの名前の区切り文字で開始する場合はクロージャを返します
 		if (clpath.startsWith(cnst.clpath.anchor)){
 			String clname = clpath.substring(cnst.clpath.anchor.length())
-			return solvePath("${cnst.tags.closure}${tpacCnst.path.keyDiv}${clname}")
+			return solvePath("closure:${clname}")
 		}
 		// パス区切り文字で分割した先頭の要素を解決します
 		if (cnst.clpath.forhandle.every { !(clpath ==~ it) }){
@@ -87,7 +86,7 @@ class ClmapMap implements TeaHandle {
 			case cnst.clpath.upper: // 上位のパスの場合
 				return (otherPath.empty)? upper : upper.cl(otherPath)
 			default: // 下位ハンドルの場合
-				def lower = solvePath("${cnst.tags.map}${tpacCnst.path.keyDiv}${firstPath}")
+				def lower = solvePath("map:${firstPath}")
 				return (otherPath.empty)? lower : lower?.cl(otherPath)
 		}
 	}

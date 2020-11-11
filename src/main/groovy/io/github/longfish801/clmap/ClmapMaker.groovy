@@ -52,8 +52,9 @@ class ClmapMaker implements TeaMaker {
 			throw new TpacSemanticException(String.format(msgs.exc.invalidHierarchy, tag, upper.tag))
 		}
 		switch (tag) {
-			case cnst.tags.closure: return new ClmapClosure()
-			case cnst.tags.map: return new ClmapMap()
+			case 'closure': return new ClmapClosure()
+			case 'map': return new ClmapMap()
+			case 'config': return new ClmapConfig()
 		}
 		return TeaMaker.super.newTeaHandle(tag, name, upper)
 	}

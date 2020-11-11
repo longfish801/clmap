@@ -7,7 +7,6 @@ package io.github.longfish801.clmap
 
 import io.github.longfish801.clmap.ClmapConst as cnst
 import io.github.longfish801.clmap.ClmapMsg as msgs
-import io.github.longfish801.tpac.TpacConst as tpacCnst
 import io.github.longfish801.tpac.TpacHandlingException
 import io.github.longfish801.tpac.tea.TeaServer
 import io.github.longfish801.tpac.tea.TeaMaker
@@ -45,7 +44,7 @@ class ClmapServer implements TeaServer {
 	 */
 	@Override
 	TeaMaker newMaker(String tag){
-		if (tag == cnst.tags.clmap) return new ClmapMaker()
+		if (tag == 'clmap') return new ClmapMaker()
 		return TeaServer.super.newMaker(tag)
 	}
 	
@@ -68,8 +67,8 @@ class ClmapServer implements TeaServer {
 		Matcher matcher = Matcher.lastMatcher
 		String firstPath = matcher.group(1)
 		String otherPath = (matcher.groupCount() >= 2)? matcher.group(2) : ''
-		String clname = (firstPath == cnst.clpath.noname)? '' : "${tpacCnst.path.keyDiv}${firstPath}"
-		def dec = getAt("${cnst.tags.clmap}${clname}")
+		String clname = (firstPath == cnst.clpath.noname)? '' : ":${firstPath}"
+		def dec = getAt("clmap${clname}")
 		return (otherPath.empty)? dec : dec?.cl(otherPath)
 	}
 }
