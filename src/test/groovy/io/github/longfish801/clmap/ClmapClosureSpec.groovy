@@ -186,6 +186,41 @@ class ClmapClosureSpec extends Specification {
 		code = server.cl('/_/map1#key1').createCode()
 		then:
 		code == expected
+		
+		when:
+		source = '''\
+			#! clmap
+			#> map:map1
+			#>> args
+				String greet
+			#-key
+				String target
+			#>> dec
+				import org.apache.commons.lang3.StringUtils
+			#-key
+				String div = ', '
+			#>> prefix
+			#-key
+				String result = ''
+			#>> suffix
+			#-key
+				return result
+			#>> closure
+				result = StringUtils.trim("   ${greet}${div}${target}.   ")
+			'''.stripIndent()
+		expected = '''\
+				import org.apache.commons.lang3.StringUtils
+				String div = ', '
+			{ 	String greet,	String target ->
+				String result = ''
+				result = StringUtils.trim("   ${greet}${div}${target}.   ")
+				return result
+			}
+			'''.stripIndent().denormalize()
+		server.soak(source)
+		code = server.cl('/_/map1#_').createCode()
+		then:
+		code == expected
 	}
 	
 	def 'addLineNo'(){

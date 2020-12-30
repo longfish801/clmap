@@ -17,11 +17,29 @@ class ClmapConfig implements TeaHandle {
 	static ConfigSlurper slurper = new ConfigSlurper()
 	
 	/**
-	 * デフォルトキーに対応するテキストを{@link ConfigSlurper}で解析した結果を返します。<br/>
-	 * デフォルトキーに対応する値がテキスト以外のときはnullを返します。
+	 * 設定値を返します。<br/>
+	 * 各キーにテキストで指定した値があれば改行コードで連結します。<br/>
+	 * それらを改行コードで連結して{@link ConfigSlurper}で解析します。<br/>
+	 * テキストの指定が無ければnullを返します。
 	 * @return ConfigObject
 	 */
 	ConfigObject config(){
-		return (dflt instanceof List)? slurper.parse(dflt?.join(System.lineSeparator())) : null
+		String data = map.values().findAll {
+			it.value instanceof List
+		}.collect {
+			it.join(System.lineSeparator())
+		}.join(System.lineSeparator())
+		return (data.length() == 0)? null : slurper.parse(data)
+	}
+	
+	/**
+	 * キーに対応する設定値を返します。<br/>
+	 * テキストで指定した値があれば改行コードで連結して{@link ConfigSlurper}で解析します。<br/>
+	 * キーに対応するテキストの指定が無ければnullを返します。
+	 * @return ConfigObject
+	 */
+	ConfigObject config(String key){
+		String data = (map.get(key) instanceof List)? map.get(key).join(System.lineSeparator()) : ''
+		return (data.length() == 0)? null : slurper.parse(data)
 	}
 }

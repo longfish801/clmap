@@ -40,4 +40,8 @@ closure {
 	bgn = '{ '
 	arg = ' ->'
 	end = '}'
+	join {
+		args = ','
+		other = System.lineSeparator()
+	}
 }

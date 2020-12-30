@@ -101,3 +101,5 @@ dependencies {
 
 0.3.01
 : config, dataハンドルを追加しました。
+0.3.02
+: args, dec, prefix, suffix, configハンドルのマップにキー指定を可能にしました。

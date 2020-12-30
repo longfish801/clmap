@@ -5,8 +5,8 @@
  */
 package io.github.longfish801.clmap
 
+import spock.lang.Shared
 import spock.lang.Specification
-import spock.lang.Unroll
 
 /**
  * ClmapConfigのテスト。
@@ -14,14 +14,31 @@ import spock.lang.Unroll
  * @author io.github.longfish801
  */
 class ClmapConfigSpec extends Specification {
-	def 'config'(){
-		given:
-		ClmapConfig clConfig
-		
-		when:
+	/** ClmapConfig */
+	@Shared ClmapConfig clConfig
+	
+	def setup(){
 		clConfig = new ClmapConfig(tag: 'config')
+	}
+	
+	def 'config'(){
+		when:
 		clConfig._ = [ /map {/, /key = 'val'/, /}/ ]
 		then:
 		clConfig.config().map.key == 'val'
+		
+		when:
+		clConfig._ = [ /some.bar = 1/ ]
+		clConfig.x = [ /some.foo = 2/ ]
+		then:
+		clConfig.config().some.bar == 1
+		clConfig.config().some.foo == 2
+		
+		when:
+		clConfig._ = [ /some.bar = 1/ ]
+		clConfig.x = [ /some.foo = 2/ ]
+		then:
+		clConfig.config('_').some.bar == 1
+		clConfig.config('x').some.foo == 2
 	}
 }

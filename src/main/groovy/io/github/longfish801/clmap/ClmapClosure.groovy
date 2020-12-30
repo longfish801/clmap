@@ -94,24 +94,36 @@ class ClmapClosure implements TeaHandle {
 		writeCode = { StringBuilder builder, String tag, TeaHandle hndl ->
 			if (hndl.upper != null) writeCode(builder, tag, hndl.upper)
 			if (hndl.solvePath(tag) != null){
-				builder << hndl.solvePath(tag).dflt.join(System.lineSeparator())
-				builder << System.lineSeparator()
+				String code = hndl.solvePath(tag).map.values().findAll {
+					it.value instanceof List
+				}.collect {
+					it.join(cnst.closure.join.other)
+				}.join(cnst.closure.join.other)
+				if (code.length() > 0){
+					builder << code
+					builder << cnst.closure.join.other
+				}
 			}
 		}
 		StringBuilder builder = new StringBuilder()
 		writeCode(builder, 'dec', this)
 		builder << cnst.closure.bgn
 		if (upper.solvePath('args') != null){
-			builder << upper.solvePath('args').dflt.join(System.lineSeparator())
+			String args = upper.solvePath('args').map.values().findAll {
+				it.value instanceof List
+			}.collect {
+				it.join(cnst.closure.join.args)
+			}.join(cnst.closure.join.args)
+			if (args.length() > 0) builder << args
 		}
 		builder << cnst.closure.arg
-		builder << System.lineSeparator()
+		builder << cnst.closure.join.other
 		writeCode(builder, 'prefix', this)
-		builder << dflt.join(System.lineSeparator())
-		builder << System.lineSeparator()
+		builder << dflt.join(cnst.closure.join.other)
+		builder << cnst.closure.join.other
 		writeCode(builder, 'suffix', this)
 		builder << cnst.closure.end
-		builder << System.lineSeparator()
+		builder << cnst.closure.join.other
 		return builder.toString()
 	}
 	
