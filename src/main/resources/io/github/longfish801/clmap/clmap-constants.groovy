@@ -1,11 +1,11 @@
 
 // 妥当なタグ
-validtags = [ 'map', 'closure', 'args', 'dec', 'prefix', 'suffix', 'data', 'config' ]
+validtags = [ 'map', 'closure', 'args', 'return', 'dec', 'prefix', 'suffix', 'data', 'config' ]
 
 // タグ間の親子関係（キーが親タグ、値は可能な子タグのリスト）
 hierarchy {
 	clmap = [ 'map', 'dec', 'prefix', 'suffix', 'data', 'config' ]
-	map = [ 'map', 'closure', 'args', 'dec', 'prefix', 'suffix', 'data', 'config' ]
+	map = [ 'map', 'closure', 'args', 'return', 'dec', 'prefix', 'suffix', 'data', 'config' ]
 }
 
 // マップ
@@ -42,6 +42,8 @@ closure {
 	end = '}'
 	join {
 		args = ','
-		other = System.lineSeparator()
+		ret = ','
 	}
+	ret = '	return '
+	lsep = System.lineSeparator()
 }

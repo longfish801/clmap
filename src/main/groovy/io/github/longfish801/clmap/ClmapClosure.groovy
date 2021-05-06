@@ -13,7 +13,7 @@ import io.github.longfish801.tpac.tea.TeaHandle
 /**
  * クロージャです。<br/>
  * GroovyのClosureインスタンスやソースコードを保持します。
- * @version 0.3.00 2020/06/11
+ * @version 0.3.01 2021/05/03
  * @author io.github.longfish801
  */
 @Slf4j('LOG')
@@ -94,14 +94,14 @@ class ClmapClosure implements TeaHandle {
 		writeCode = { StringBuilder builder, String tag, TeaHandle hndl ->
 			if (hndl.upper != null) writeCode(builder, tag, hndl.upper)
 			if (hndl.solvePath(tag) != null){
-				String code = hndl.solvePath(tag).map.values().findAll {
-					it.value instanceof List
-				}.collect {
-					it.join(cnst.closure.join.other)
-				}.join(cnst.closure.join.other)
+				String code = hndl.solvePath(tag).map.findAll {
+					(it.key == '_' || it.key ==name) && it.value instanceof List
+				}.values().collect {
+					it.join(cnst.closure.lsep)
+				}.join(cnst.closure.lsep)
 				if (code.length() > 0){
 					builder << code
-					builder << cnst.closure.join.other
+					builder << cnst.closure.lsep
 				}
 			}
 		}
@@ -109,21 +109,29 @@ class ClmapClosure implements TeaHandle {
 		writeCode(builder, 'dec', this)
 		builder << cnst.closure.bgn
 		if (upper.solvePath('args') != null){
-			String args = upper.solvePath('args').map.values().findAll {
-				it.value instanceof List
-			}.collect {
+			String args = upper.solvePath('args').map.findAll {
+				(it.key == '_' || it.key ==name) && it.value instanceof List
+			}.values().collect {
 				it.join(cnst.closure.join.args)
 			}.join(cnst.closure.join.args)
 			if (args.length() > 0) builder << args
 		}
 		builder << cnst.closure.arg
-		builder << cnst.closure.join.other
+		builder << cnst.closure.lsep
 		writeCode(builder, 'prefix', this)
-		builder << dflt.join(cnst.closure.join.other)
-		builder << cnst.closure.join.other
+		builder << dflt.join(cnst.closure.lsep)
+		builder << cnst.closure.lsep
 		writeCode(builder, 'suffix', this)
+		if (upper.solvePath('return') != null){
+			String ret = upper.solvePath('return').map.findAll {
+				it.key == '_' && it.value instanceof List
+			}.values().collect {
+				it.join(cnst.closure.join.ret)
+			}.join(cnst.closure.join.args)
+			if (ret.length() > 0) builder << "${cnst.closure.ret}${ret}${cnst.closure.lsep}"
+		}
 		builder << cnst.closure.end
-		builder << cnst.closure.join.other
+		builder << cnst.closure.lsep
 		return builder.toString()
 	}
 	

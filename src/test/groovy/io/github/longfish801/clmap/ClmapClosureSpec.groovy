@@ -147,8 +147,8 @@ class ClmapClosureSpec extends Specification {
 	def 'createCode'(){
 		given:
 		String source
-		String code
-		String expected
+		String code, code2
+		String expected, expected2
 		
 		when:
 		source = '''\
@@ -167,7 +167,9 @@ class ClmapClosureSpec extends Specification {
 			#>> prefix
 				String result = ''
 			#>> suffix
-				return result
+				result += '!'
+			#>> return
+				result
 			#>> closure:key1
 				result = StringUtils.trim("   ${cmnString} ${yourName}.   ")
 			'''.stripIndent()
@@ -179,7 +181,8 @@ class ClmapClosureSpec extends Specification {
 				String result = ''
 				result = StringUtils.trim("   ${cmnString} ${yourName}.   ")
 				println 'END HERE'
-				return result
+				result += '!'
+				return 	result
 			}
 			'''.stripIndent().denormalize()
 		server.soak(source)
@@ -198,29 +201,45 @@ class ClmapClosureSpec extends Specification {
 			#>> dec
 				import org.apache.commons.lang3.StringUtils
 			#-key
-				String div = ', '
+				// some dec
 			#>> prefix
+				String div = ', '
 			#-key
-				String result = ''
+				div = '-'
 			#>> suffix
-			#-key
 				return result
+			#-key
+				// some suffix
 			#>> closure
-				result = StringUtils.trim("   ${greet}${div}${target}.   ")
+				String result = StringUtils.trim("   ${greet}${div}.   ")
+			#>> closure:key
+				String result = StringUtils.trim("   ${greet}${div}${target}.   ")
 			'''.stripIndent()
 		expected = '''\
 				import org.apache.commons.lang3.StringUtils
+			{ 	String greet ->
 				String div = ', '
-			{ 	String greet,	String target ->
-				String result = ''
-				result = StringUtils.trim("   ${greet}${div}${target}.   ")
+				String result = StringUtils.trim("   ${greet}${div}.   ")
 				return result
+			}
+			'''.stripIndent().denormalize()
+		expected2 = '''\
+				import org.apache.commons.lang3.StringUtils
+				// some dec
+			{ 	String greet,	String target ->
+				String div = ', '
+				div = '-'
+				String result = StringUtils.trim("   ${greet}${div}${target}.   ")
+				return result
+				// some suffix
 			}
 			'''.stripIndent().denormalize()
 		server.soak(source)
 		code = server.cl('/_/map1#_').createCode()
+		code2 = server.cl('/_/map1#key').createCode()
 		then:
 		code == expected
+		code2 == expected2
 	}
 	
 	def 'addLineNo'(){

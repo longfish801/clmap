@@ -25,29 +25,40 @@
 
 ```
 #! clmap
-#> data
-one
-two
-three
+#> map:const
+#>> args
+	String time
+	String name
+#>> closure
+	greet = clmap.solvePath('config:messages').config().greeting[time]
+	title = clmap.solvePath('data:title').dflt[titleMap[name]]
+	return "${greet}, ${title}${name}."
+#>> data:title
+Mr.
+Mrs.
+Ms.
+#>> config:messages
+greeting {
+	morning = 'Good morning'
+	noon = 'Hello'
+	night = 'Good night'
+}
 #> map
 #>> args
-	int idx
-#>> closure
-	return clmap.solvePath('/clmap/data').dflt[idx]
-#> map:hello
-#>> config:messages
-hello {
-	message = 'Hello, %s!'
-}
-#>> args
-	String yourName
-#>> closure:key1
-	return String.format(clmap.solvePath('config:messages').config().hello.message, yourName)
-#>> closure:key2
-	config.msg = 'HELLO, WORLD!'
-	return clmap.cl('#key1').call(yourName.toLowerCase())
-#>> closure:key3
-	return config.msg
+	String name
+#>> prefix
+	String message
+#>> suffix
+#-noon
+	message = message.toUpperCase()
+#>> closure:morning
+	message = clmap.cl('/_/const#_').call('morning', name)
+#>> closure:noon
+	message = clmap.cl('/_/const#_').call('noon', name)
+#>> closure:night
+	message = clmap.cl('/_/const#_').call('night', name)
+#>> return
+	message
 ```
 
 　上記の clmap文書を読みこんでクロージャを実行し、期待する戻り値を得られるか assertで確認するスクリプトです（src/test/groovy/Sample.groovy）。
@@ -57,17 +68,20 @@ import io.github.longfish801.clmap.ClmapServer
 
 def clmap
 try {
-	clmap = new ClmapServer().soak(new File('src/test/resources/sample.tpac')).cl('/_')
+	clmap = new ClmapServer().soak(new File('src/test/resources/sample.tpac'))
 } catch (exc){
 	exc.printStackTrace()
 }
 
-assert 'two' == clmap.call(1)
+clmap.cl('/_/const').properties.titleMap = [
+	'Kennedy': 0,
+	'Thatcher': 1,
+	'Windsor': 2
+]
 
-clmap.cl('hello').properties.config = new ConfigObject()
-assert 'Hello, John!' == clmap.cl('hello#key1').call('John')
-assert 'Hello, john!' == clmap.cl('hello#key2').call('John')
-assert 'HELLO, WORLD!' == clmap.cl('hello#key3').call('John')
+assert 'Good morning, Mr.Kennedy.' == clmap.cl('/_/_#morning').call('Kennedy')
+assert 'HELLO, MRS.THATCHER.' == clmap.cl('/_/_#noon').call('Thatcher')
+assert 'Good night, Ms.Windsor.' == clmap.cl('/_/_#night').call('Windsor')
 ```
 
 　このサンプルコードは build.gradle内の execSamplesタスクで実行しています。
@@ -101,5 +115,10 @@ dependencies {
 
 0.3.01
 : config, dataハンドルを追加しました。
+
 0.3.02
 : args, dec, prefix, suffix, configハンドルのマップにキー指定を可能にしました。
+
+0.3.03
+: args, dec, prefix, suffix, configハンドルのマップのキー指定はclosureハンドルの名前と一致時のみにしました。
+: returnハンドルを追加しました。

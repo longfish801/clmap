@@ -2,14 +2,17 @@ import io.github.longfish801.clmap.ClmapServer
 
 def clmap
 try {
-	clmap = new ClmapServer().soak(new File('src/test/resources/sample.tpac')).cl('/_')
+	clmap = new ClmapServer().soak(new File('src/test/resources/sample.tpac'))
 } catch (exc){
 	exc.printStackTrace()
 }
 
-assert 'two' == clmap.call(1)
+clmap.cl('/_/const').properties.titleMap = [
+	'Kennedy': 0,
+	'Thatcher': 1,
+	'Windsor': 2
+]
 
-clmap.cl('hello').properties.config = new ConfigObject()
-assert 'Hello, John!' == clmap.cl('hello#key1').call('John')
-assert 'Hello, john!' == clmap.cl('hello#key2').call('John')
-assert 'HELLO, WORLD!' == clmap.cl('hello#key3').call('John')
+assert 'Good morning, Mr.Kennedy.' == clmap.cl('/_/_#morning').call('Kennedy')
+assert 'HELLO, MRS.THATCHER.' == clmap.cl('/_/_#noon').call('Thatcher')
+assert 'Good night, Ms.Windsor.' == clmap.cl('/_/_#night').call('Windsor')
