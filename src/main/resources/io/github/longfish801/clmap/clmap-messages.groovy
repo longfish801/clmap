@@ -9,6 +9,6 @@ exc {
 }
 
 // ログメッセージ
-log {
+logmsg {
 	failedCompile = 'Failed to compile closure. clpath={}, code=\n{}\n-----'
 }

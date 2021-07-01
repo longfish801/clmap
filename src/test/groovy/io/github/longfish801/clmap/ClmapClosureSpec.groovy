@@ -6,6 +6,7 @@
 package io.github.longfish801.clmap
 
 import io.github.longfish801.clmap.ClmapMsg as msgs
+import org.codehaus.groovy.control.MultipleCompilationErrorsException
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -142,6 +143,27 @@ class ClmapClosureSpec extends Specification {
 		clclosure111.code = '{ -> clmap }'
 		then:
 		clclosure111.createClosure().call() == map11
+	}
+	
+	def 'createClosure - exception'(){
+		given:
+		Clmap clmap
+		ClmapMap map1, map11
+		ClmapClosure clclosure11, clclosure111
+		MultipleCompilationErrorsException exc
+		
+		when:
+		clmap = new Clmap(tag: 'clmap')
+		map1 = new ClmapMap(tag: 'map')
+		clclosure11 = new ClmapClosure(tag: 'closure', name: 'cl11')
+		server << clmap
+		clmap << map1
+		map1 << clclosure11
+		clclosure11.code = '{ -> } }'
+		clclosure11.createClosure()
+		then:
+		exc = thrown(MultipleCompilationErrorsException)
+		exc.message.startsWith('startup failed:') == true
 	}
 	
 	def 'createCode'(){
