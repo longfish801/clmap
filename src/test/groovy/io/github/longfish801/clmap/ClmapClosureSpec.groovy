@@ -174,7 +174,7 @@ class ClmapClosureSpec extends Specification {
 		
 		when:
 		source = '''\
-			#! clmap
+			#! clmap:test1
 			#> dec
 				import org.apache.commons.lang3.StringUtils
 			#> prefix
@@ -208,13 +208,13 @@ class ClmapClosureSpec extends Specification {
 			}
 			'''.stripIndent().denormalize()
 		server.soak(source)
-		code = server.cl('/_/map1#key1').createCode()
+		code = server.cl('/test1/map1#key1').createCode()
 		then:
 		code == expected
 		
 		when:
 		source = '''\
-			#! clmap
+			#! clmap:test2
 			#> map:map1
 			#>> args
 				String greet
@@ -257,8 +257,8 @@ class ClmapClosureSpec extends Specification {
 			}
 			'''.stripIndent().denormalize()
 		server.soak(source)
-		code = server.cl('/_/map1#_').createCode()
-		code2 = server.cl('/_/map1#key').createCode()
+		code = server.cl('/test2/map1#_').createCode()
+		code2 = server.cl('/test2/map1#key').createCode()
 		then:
 		code == expected
 		code2 == expected2

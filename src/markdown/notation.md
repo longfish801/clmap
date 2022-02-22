@@ -155,5 +155,3 @@ String cmnString = 'This is'
 	return result
 }
 ```
-
-以上

@@ -122,3 +122,6 @@ dependencies {
 0.3.03
 : args, dec, prefix, suffix, configハンドルのマップのキー指定はclosureハンドルの名前と一致時のみにしました。
 : returnハンドルを追加しました。
+
+0.3.04
+: ドキュメントはmavenリポジトリに出力するよう修正しました。
