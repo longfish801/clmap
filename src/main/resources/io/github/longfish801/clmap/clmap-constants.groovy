@@ -19,7 +19,7 @@ clpath {
 	level = '/'
 	anchor = '#'
 	upper = '..'
-	noname = '_'
+	noname = 'dflt'
 	forserver = [
 		/\/([^#\/:]+)/,
 		/\/([^#\/:]+)\/(.+)/

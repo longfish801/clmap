@@ -26,10 +26,10 @@ greeting {
 #-noon
 	message = message.toUpperCase()
 #>> closure:morning
-	message = clmap.cl('/_/const#_').call('morning', name)
+	message = clmap.cl('/dflt/const#dflt').call('morning', name)
 #>> closure:noon
-	message = clmap.cl('/_/const#_').call('noon', name)
+	message = clmap.cl('/dflt/const#dflt').call('noon', name)
 #>> closure:night
-	message = clmap.cl('/_/const#_').call('night', name)
+	message = clmap.cl('/dflt/const#dflt').call('night', name)
 #>> return
 	message

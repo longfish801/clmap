@@ -23,22 +23,22 @@ class ClmapConfigSpec extends Specification {
 	
 	def 'config'(){
 		when:
-		clConfig._ = [ /map {/, /key = 'val'/, /}/ ]
+		clConfig.dflt = [ /map {/, /key = 'val'/, /}/ ]
 		then:
 		clConfig.config().map.key == 'val'
 		
 		when:
-		clConfig._ = [ /some.bar = 1/ ]
+		clConfig.dflt = [ /some.bar = 1/ ]
 		clConfig.x = [ /some.foo = 2/ ]
 		then:
 		clConfig.config().some.bar == 1
 		clConfig.config().some.foo == 2
 		
 		when:
-		clConfig._ = [ /some.bar = 1/ ]
+		clConfig.dflt = [ /some.bar = 1/ ]
 		clConfig.x = [ /some.foo = 2/ ]
 		then:
-		clConfig.config('_').some.bar == 1
+		clConfig.config('dflt').some.bar == 1
 		clConfig.config('x').some.foo == 2
 	}
 }

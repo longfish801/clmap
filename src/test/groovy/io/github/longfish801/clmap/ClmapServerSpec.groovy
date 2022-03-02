@@ -63,7 +63,7 @@ class ClmapServerSpec extends Specification {
 		
 		where:
 		clpath			|| path
-		'/_'			|| '/clmap'
+		'/dflt'			|| '/clmap'
 		'/dec1'			|| '/clmap:dec1'
 		'/dec1/map1'	|| '/clmap:dec1/map:map1'
 	}

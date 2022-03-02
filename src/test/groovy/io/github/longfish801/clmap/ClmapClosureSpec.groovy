@@ -52,7 +52,7 @@ class ClmapClosureSpec extends Specification {
 		map1 << map11
 		map11 << cl111
 		then:
-		cl111.clpath == '/_/_/_#_'
+		cl111.clpath == '/dflt/dflt/dflt#dflt'
 	}
 	
 	def 'call'(){
@@ -143,6 +143,54 @@ class ClmapClosureSpec extends Specification {
 		clclosure111.code = '{ -> clmap }'
 		then:
 		clclosure111.createClosure().call() == map11
+		
+		when: '大域変数を利用できること'
+		clmap = new Clmap(tag: 'clmap')
+		map1 = new ClmapMap(tag: 'map')
+		map11 = new ClmapMap(tag: 'map')
+		clclosure111 = new ClmapClosure(tag: 'closure', name: 'cl111')
+		server << clmap
+		clmap << map1
+		map1 << map11
+		map11 << clclosure111
+		clmap.properties['prop1'] = 'val1'
+		map1.properties['prop2'] = 'val2'
+		map11.properties['prop3'] = 'val3'
+		clclosure111.code = '{ -> [ prop1, prop2, prop3 ].join("-") }'
+		then:
+		clclosure111.createClosure().call() == 'val1-val2-val3'
+		
+		when: '宣言の大域変数を下位のmapハンドルで上書きできること'
+		clmap = new Clmap(tag: 'clmap')
+		map1 = new ClmapMap(tag: 'map')
+		map11 = new ClmapMap(tag: 'map')
+		clclosure111 = new ClmapClosure(tag: 'closure', name: 'cl111')
+		server << clmap
+		clmap << map1
+		map1 << map11
+		map11 << clclosure111
+		clmap.properties['prop1'] = 'val1'
+		clmap.properties['prop2'] = 'val2'
+		map11.properties['prop2'] = 'val2overwrite'
+		clclosure111.code = '{ -> [ prop1, prop2 ].join("-") }'
+		then:
+		clclosure111.createClosure().call() == 'val1-val2overwrite'
+		
+		when: 'mapハンドルの大域変数を下位のmapハンドルで上書きできること'
+		clmap = new Clmap(tag: 'clmap')
+		map1 = new ClmapMap(tag: 'map')
+		map11 = new ClmapMap(tag: 'map')
+		clclosure111 = new ClmapClosure(tag: 'closure', name: 'cl111')
+		server << clmap
+		clmap << map1
+		map1 << map11
+		map11 << clclosure111
+		map1.properties['prop1'] = 'val1'
+		map1.properties['prop2'] = 'val2'
+		map11.properties['prop2'] = 'val2overwrite'
+		clclosure111.code = '{ -> [ prop1, prop2 ].join("-") }'
+		then:
+		clclosure111.createClosure().call() == 'val1-val2overwrite'
 	}
 	
 	def 'createClosure - exception'(){
@@ -257,7 +305,7 @@ class ClmapClosureSpec extends Specification {
 			}
 			'''.stripIndent().denormalize()
 		server.soak(source)
-		code = server.cl('/test2/map1#_').createCode()
+		code = server.cl('/test2/map1#dflt').createCode()
 		code2 = server.cl('/test2/map1#key').createCode()
 		then:
 		code == expected

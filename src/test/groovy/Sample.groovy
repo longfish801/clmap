@@ -7,12 +7,12 @@ try {
 	exc.printStackTrace()
 }
 
-clmap.cl('/_/const').properties.titleMap = [
+clmap.cl('/dflt/const').properties.titleMap = [
 	'Kennedy': 0,
 	'Thatcher': 1,
 	'Windsor': 2
 ]
 
-assert 'Good morning, Mr.Kennedy.' == clmap.cl('/_/_#morning').call('Kennedy')
-assert 'HELLO, MRS.THATCHER.' == clmap.cl('/_/_#noon').call('Thatcher')
-assert 'Good night, Ms.Windsor.' == clmap.cl('/_/_#night').call('Windsor')
+assert 'Good morning, Mr.Kennedy.' == clmap.cl('/dflt/dflt#morning').call('Kennedy')
+assert 'HELLO, MRS.THATCHER.' == clmap.cl('/dflt/dflt#noon').call('Thatcher')
+assert 'Good night, Ms.Windsor.' == clmap.cl('/dflt/dflt#night').call('Windsor')

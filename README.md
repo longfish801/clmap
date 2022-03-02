@@ -29,10 +29,10 @@ Here is a sample clmap document (src/test/resources/sample.tpac).
 #>> closure
 	return "Hello, ${yourName}!"
 #>> closure:key1
-	return clmap.cl('#_').call(yourName.toLowerCase())
+	return clmap.cl('#dflt').call(yourName.toLowerCase())
 #>> closure:key2
 	config.msg = 'HELLO, WORLD!'
-	return clmap.cl('#_').call(yourName.toUpperCase())
+	return clmap.cl('#dflt').call(yourName.toUpperCase())
 #>> closure:key3
 	return config.msg
 ```
@@ -44,14 +44,14 @@ import io.github.longfish801.clmap.ClmapServer
 
 def clmap
 try {
-	clmap = new ClmapServer().soak(new File('src/test/resources/sample.tpac')).cl('/_/_')
+	clmap = new ClmapServer().soak(new File('src/test/resources/sample.tpac')).cl('/dflt/dflt')
 } catch (exc){
 	exc.printStackTrace()
 }
 
 clmap.properties.config = new ConfigObject()
 
-assert 'Hello, World!' == clmap.cl('#_').call('World')
+assert 'Hello, World!' == clmap.cl('#dflt').call('World')
 assert 'Hello, world!' == clmap.cl('#key1').call('World')
 assert 'Hello, WORLD!' == clmap.cl('#key2').call('World')
 assert 'HELLO, WORLD!' == clmap.cl('#key3').call('DUMMY')

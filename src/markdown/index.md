@@ -52,11 +52,11 @@ greeting {
 #-noon
 	message = message.toUpperCase()
 #>> closure:morning
-	message = clmap.cl('/_/const#_').call('morning', name)
+	message = clmap.cl('/dflt/const#dflt').call('morning', name)
 #>> closure:noon
-	message = clmap.cl('/_/const#_').call('noon', name)
+	message = clmap.cl('/dflt/const#dflt').call('noon', name)
 #>> closure:night
-	message = clmap.cl('/_/const#_').call('night', name)
+	message = clmap.cl('/dflt/const#dflt').call('night', name)
 #>> return
 	message
 ```
@@ -73,15 +73,15 @@ try {
 	exc.printStackTrace()
 }
 
-clmap.cl('/_/const').properties.titleMap = [
+clmap.cl('/dflt/const').properties.titleMap = [
 	'Kennedy': 0,
 	'Thatcher': 1,
 	'Windsor': 2
 ]
 
-assert 'Good morning, Mr.Kennedy.' == clmap.cl('/_/_#morning').call('Kennedy')
-assert 'HELLO, MRS.THATCHER.' == clmap.cl('/_/_#noon').call('Thatcher')
-assert 'Good night, Ms.Windsor.' == clmap.cl('/_/_#night').call('Windsor')
+assert 'Good morning, Mr.Kennedy.' == clmap.cl('/dflt/dflt#morning').call('Kennedy')
+assert 'HELLO, MRS.THATCHER.' == clmap.cl('/dflt/dflt#noon').call('Thatcher')
+assert 'Good night, Ms.Windsor.' == clmap.cl('/dflt/dflt#night').call('Windsor')
 ```
 
 　このサンプルコードは build.gradle内の execSamplesタスクで実行しています。
@@ -125,3 +125,6 @@ dependencies {
 
 0.3.04
 : ドキュメントはmavenリポジトリに出力するよう修正しました。
+
+0.3.05
+: 宣言に大域変数を設定できるよう対応しました。

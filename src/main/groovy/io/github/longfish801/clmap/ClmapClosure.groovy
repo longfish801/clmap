@@ -63,8 +63,9 @@ class ClmapClosure implements TeaHandle {
 	/**
 	 * クロージャを生成します。<br/>
 	 * クロージャのソースコードを未作成であれば、作成してメンバ変数 codeに格納します。<br/>
-	 * クロージャ生成時、{@link ClmapMap}クラスのメンバ変数 propertiesを
+	 * クロージャ生成時、{@link Clmap}, {@link ClmapMap}クラスのメンバ変数 propertiesを
 	 * 大域変数として利用できるよう設定（delegateに設定）します。<br/>
+	 * 同じ大域変数名がある場合はより下位の {@link ClmapMap}クラスでの値で上書きされます。<br/>
 	 * コンパイル時に Throwableをキャッチしたならば WARNログを出力します。
 	 * @return クロージャ
 	 * @see #createCode()
@@ -74,10 +75,14 @@ class ClmapClosure implements TeaHandle {
 			code = createCode()
 			LOG.debug("--- closure code: clpath={} ---\n{}\n---", clpath, code)
 		}
+		Closure getProperties
+		getProperties = { def hndl ->
+			return (hndl.level == 0)? (hndl as Clmap).properties : getProperties.call(hndl.upper) + (hndl as ClmapMap).properties
+		}
 		Closure closure
 		try {
 			closure = (upper as ClmapMap).shell.evaluate(code, clpath)
-			closure.delegate = (upper as ClmapMap).properties
+			closure.delegate = getProperties.call(upper)
 		} catch (Throwable exc){
 			LOG.warn(String.format(msgs.logmsg.failedCompile, clpath, addLineNo(code)))
 			throw exc
@@ -95,7 +100,7 @@ class ClmapClosure implements TeaHandle {
 			if (hndl.upper != null) writeCode(builder, tag, hndl.upper)
 			if (hndl.solvePath(tag) != null){
 				String code = hndl.solvePath(tag).map.findAll {
-					(it.key == '_' || it.key ==name) && it.value instanceof List
+					(it.key == 'dflt' || it.key ==name) && it.value instanceof List
 				}.values().collect {
 					it.join(cnst.closure.lsep)
 				}.join(cnst.closure.lsep)
@@ -110,7 +115,7 @@ class ClmapClosure implements TeaHandle {
 		builder << cnst.closure.bgn
 		if (upper.solvePath('args') != null){
 			String args = upper.solvePath('args').map.findAll {
-				(it.key == '_' || it.key ==name) && it.value instanceof List
+				(it.key == 'dflt' || it.key ==name) && it.value instanceof List
 			}.values().collect {
 				it.join(cnst.closure.join.args)
 			}.join(cnst.closure.join.args)
@@ -124,7 +129,7 @@ class ClmapClosure implements TeaHandle {
 		writeCode(builder, 'suffix', this)
 		if (upper.solvePath('return') != null){
 			String ret = upper.solvePath('return').map.findAll {
-				it.key == '_' && it.value instanceof List
+				it.key == 'dflt' && it.value instanceof List
 			}.values().collect {
 				it.join(cnst.closure.join.ret)
 			}.join(cnst.closure.join.args)

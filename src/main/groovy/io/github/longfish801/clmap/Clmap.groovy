@@ -17,6 +17,9 @@ import java.util.regex.Matcher
  * @author io.github.longfish801
  */
 class Clmap implements TeaDec {
+	/** この宣言配下のすべてのクロージャの大域変数として使用するプロパティ */
+	Map properties = [:]
+	
 	/**
 	 * クロージャパスの参照対象を返します。<br/>
 	 * 絶対パスの場合はサーバーに解決を依頼します。<br/>
