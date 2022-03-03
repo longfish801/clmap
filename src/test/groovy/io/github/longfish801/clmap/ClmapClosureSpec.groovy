@@ -6,6 +6,7 @@
 package io.github.longfish801.clmap
 
 import io.github.longfish801.clmap.ClmapMsg as msgs
+import io.github.longfish801.tpac.TpacSemanticException
 import org.codehaus.groovy.control.MultipleCompilationErrorsException
 import spock.lang.Shared
 import spock.lang.Specification
@@ -232,14 +233,12 @@ class ClmapClosureSpec extends Specification {
 			#> map:map1
 			#>> args
 				String yourName
+			#>> return
+				String result
 			#>> dec
 				String cmnString = 'This is'
-			#>> prefix
-				String result = ''
 			#>> suffix
 				result += '!'
-			#>> return
-				result
 			#>> closure:key1
 				result = StringUtils.trim("   ${cmnString} ${yourName}.   ")
 			'''.stripIndent()
@@ -247,12 +246,12 @@ class ClmapClosureSpec extends Specification {
 				import org.apache.commons.lang3.StringUtils
 				String cmnString = 'This is'
 			{ 	String yourName ->
+				String result
 				println 'BGN HERE'
-				String result = ''
 				result = StringUtils.trim("   ${cmnString} ${yourName}.   ")
 				println 'END HERE'
 				result += '!'
-				return 	result
+				return result
 			}
 			'''.stripIndent().denormalize()
 		server.soak(source)
@@ -310,6 +309,62 @@ class ClmapClosureSpec extends Specification {
 		then:
 		code == expected
 		code2 == expected2
+	}
+	
+	def 'createCode - exception'(){
+		given:
+		String source
+		TpacSemanticException exc
+		
+		when:
+		source = '''\
+			#! clmap:test1
+			#> map:map1
+			#>> args
+				String yourName
+			#>> return String message
+			#>> closure:key1
+				message = 'Hello!'
+			'''.stripIndent().denormalize()
+		server.soak(source)
+		server.cl('/test1/map1#key1').createCode()
+		then:
+		exc = thrown(TpacSemanticException)
+		exc.message == msgs.exc.noReturnText
+		
+		when:
+		source = '''\
+			#! clmap:test2
+			#> map:map1
+			#>> args
+				String yourName
+			#>> return
+				message
+			#>> closure:key1
+				message = 'Hello!'
+			'''.stripIndent().denormalize()
+		server.soak(source)
+		server.cl('/test2/map1#key1').createCode()
+		then:
+		exc = thrown(TpacSemanticException)
+		exc.message == String.format(msgs.exc.invadlidReturn, '	message')
+		
+		when:
+		source = '''\
+			#! clmap:test3
+			#> map:map1
+			#>> args
+				String yourName
+			#>> return
+			 
+			#>> closure:key1
+				message = 'Hello!'
+			'''.stripIndent().denormalize()
+		server.soak(source)
+		server.cl('/test3/map1#key1').createCode()
+		then:
+		exc = thrown(TpacSemanticException)
+		exc.message == String.format(msgs.exc.invadlidReturn, '')
 	}
 	
 	def 'addLineNo'(){

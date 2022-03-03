@@ -20,7 +20,7 @@ greeting {
 #> map
 #>> args
 	String name
-#>> prefix
+#>> return
 	String message
 #>> suffix
 #-noon
@@ -31,5 +31,3 @@ greeting {
 	message = clmap.cl('/dflt/const#dflt').call('noon', name)
 #>> closure:night
 	message = clmap.cl('/dflt/const#dflt').call('night', name)
-#>> return
-	message

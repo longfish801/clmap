@@ -45,9 +45,10 @@
 
 　returnハンドルには戻り値を記述します。
 　同じmapハンドルに属す closureハンドルに定義されたクロージャすべてに共通する戻り値を定義します。
+　戻り値は、変数の型と変数名を半角スペースで連結して記述してください。
 　省略できます。closureハンドルに直接return文を記述しても構いません。
 　可能な子要素はありません。
-　デフォルトキーにテキストで指定します。各行は半角カンマ(,)で連結します。これは将来的な拡張に備えたものであり、Groovyの文法上は return文に複数の値を指定することはできません。
+　デフォルトキーにテキストで指定します。Groovyのクロージャは戻り値をひとつしか返さないため、二行目以降は無視します。
 　デフォルトキー以外のキーを指定できません。
 
 ## decハンドル
@@ -130,11 +131,11 @@
 #>> args
 	String yourName
 #>> return
-	result
+	String result
 #>> dec
 	String cmnString = 'This is'
 #>> prefix
-	String result = ''
+	result = ''
 #>> suffix
 	result += '!'
 #>> closure:key1
@@ -150,8 +151,9 @@ import org.apache.commons.lang3.StringUtils
 String cmnString = 'This is'
 
 { String yourName ->
+	String result
 	println 'BGN HERE'
-	String result = ''
+	result = ''
 	result = StringUtils.trim("   ${cmnString} ${yourName}.   ")
 	println 'END HERE'
 	result += '!'

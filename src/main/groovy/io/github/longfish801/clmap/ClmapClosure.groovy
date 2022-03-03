@@ -8,6 +8,7 @@ package io.github.longfish801.clmap
 import groovy.util.logging.Slf4j
 import io.github.longfish801.clmap.ClmapConst as cnst
 import io.github.longfish801.clmap.ClmapMsg as msgs
+import io.github.longfish801.tpac.TpacSemanticException
 import io.github.longfish801.tpac.tea.TeaHandle
 
 /**
@@ -93,6 +94,8 @@ class ClmapClosure implements TeaHandle {
 	/**
 	 * クロージャのソースコードを生成します。
 	 * @return クロージャのソースコード
+	 * @exception TpacSemanticException returnハンドルにテキストが指定されていません。
+	 * @exception TpacSemanticException returnハンドルの指定が不正です。
 	 */
 	String createCode(){
 		Closure writeCode
@@ -110,31 +113,39 @@ class ClmapClosure implements TeaHandle {
 				}
 			}
 		}
+		// 戻り値の宣言と変数を取得します
+		String retDef = ''
+		String retVar = ''
+		if (upper.solvePath('return') != null){
+			List returns = upper.solvePath('return').map.findAll {
+				it.key == 'dflt' && it.value instanceof List
+			}.values() as List
+			if (returns.size() == 0) throw new TpacSemanticException(msgs.exc.noReturnText)
+			retDef = returns.first().first()
+			if (retDef.indexOf(cnst.closure.splitret) < 0) throw new TpacSemanticException(String.format(msgs.exc.invadlidReturn, retDef))
+			retVar = retDef.split(cnst.closure.splitret).last()
+			if (retVar.empty) throw new TpacSemanticException(String.format(msgs.exc.invadlidReturn, retDef))
+		}
+		// クロージャのソースコードを生成します
 		StringBuilder builder = new StringBuilder()
 		writeCode(builder, 'dec', this)
 		builder << cnst.closure.bgn
 		if (upper.solvePath('args') != null){
 			String args = upper.solvePath('args').map.findAll {
-				(it.key == 'dflt' || it.key ==name) && it.value instanceof List
+				(it.key == 'dflt' || it.key == name) && it.value instanceof List
 			}.values().collect {
-				it.join(cnst.closure.join.args)
-			}.join(cnst.closure.join.args)
+				it.join(cnst.closure.joinargs)
+			}.join(cnst.closure.joinargs)
 			if (args.length() > 0) builder << args
 		}
 		builder << cnst.closure.arg
 		builder << cnst.closure.lsep
+		if (!retDef.empty) builder << "${retDef}${cnst.closure.lsep}"
 		writeCode(builder, 'prefix', this)
 		builder << dflt.join(cnst.closure.lsep)
 		builder << cnst.closure.lsep
 		writeCode(builder, 'suffix', this)
-		if (upper.solvePath('return') != null){
-			String ret = upper.solvePath('return').map.findAll {
-				it.key == 'dflt' && it.value instanceof List
-			}.values().collect {
-				it.join(cnst.closure.join.ret)
-			}.join(cnst.closure.join.args)
-			if (ret.length() > 0) builder << "${cnst.closure.ret}${ret}${cnst.closure.lsep}"
-		}
+		if (!retVar.empty) builder << "${cnst.closure.ret}${retVar}${cnst.closure.lsep}"
 		builder << cnst.closure.end
 		builder << cnst.closure.lsep
 		return builder.toString()

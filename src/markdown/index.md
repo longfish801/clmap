@@ -46,7 +46,7 @@ greeting {
 #> map
 #>> args
 	String name
-#>> prefix
+#>> return
 	String message
 #>> suffix
 #-noon
@@ -57,8 +57,6 @@ greeting {
 	message = clmap.cl('/dflt/const#dflt').call('noon', name)
 #>> closure:night
 	message = clmap.cl('/dflt/const#dflt').call('night', name)
-#>> return
-	message
 ```
 
 　上記の clmap文書を読みこんでクロージャを実行し、期待する戻り値を得られるか assertで確認するスクリプトです（src/test/groovy/Sample.groovy）。
@@ -128,3 +126,6 @@ dependencies {
 
 0.3.05
 : 宣言に大域変数を設定できるよう対応しました。
+
+0.3.06
+: returnハンドルに変数の型も記述するよう変更しました。
