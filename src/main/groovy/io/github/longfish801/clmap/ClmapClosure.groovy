@@ -10,6 +10,7 @@ import io.github.longfish801.clmap.ClmapConst as cnst
 import io.github.longfish801.clmap.ClmapMsg as msgs
 import io.github.longfish801.tpac.TpacSemanticException
 import io.github.longfish801.tpac.tea.TeaHandle
+import org.apache.commons.lang3.StringUtils
 
 /**
  * クロージャです。<br/>
@@ -121,10 +122,13 @@ class ClmapClosure implements TeaHandle {
 				it.key == 'dflt' && it.value instanceof List
 			}.values() as List
 			if (returns.size() == 0) throw new TpacSemanticException(msgs.exc.noReturnText)
-			retDef = returns.first().first()
-			if (retDef.indexOf(cnst.closure.splitret) < 0) throw new TpacSemanticException(String.format(msgs.exc.invadlidReturn, retDef))
-			retVar = retDef.split(cnst.closure.splitret).last()
-			if (retVar.empty) throw new TpacSemanticException(String.format(msgs.exc.invadlidReturn, retDef))
+			retDef = StringUtils.trim(returns.first().first())
+			if (retDef.indexOf(cnst.closure.retdiv) < 0){
+				retVar = retDef
+				retDef = ''
+			} else {
+				retVar = retDef.split(cnst.closure.retdiv).last()
+			}
 		}
 		// クロージャのソースコードを生成します
 		StringBuilder builder = new StringBuilder()
@@ -134,8 +138,8 @@ class ClmapClosure implements TeaHandle {
 			String args = upper.solvePath('args').map.findAll {
 				(it.key == 'dflt' || it.key == name) && it.value instanceof List
 			}.values().collect {
-				it.join(cnst.closure.joinargs)
-			}.join(cnst.closure.joinargs)
+				it.join(cnst.closure.argdiv)
+			}.join(cnst.closure.argdiv)
 			if (args.length() > 0) builder << args
 		}
 		builder << cnst.closure.arg

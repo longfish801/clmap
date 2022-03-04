@@ -246,7 +246,7 @@ class ClmapClosureSpec extends Specification {
 				import org.apache.commons.lang3.StringUtils
 				String cmnString = 'This is'
 			{ 	String yourName ->
-				String result
+			String result
 				println 'BGN HERE'
 				result = StringUtils.trim("   ${cmnString} ${yourName}.   ")
 				println 'END HERE'
@@ -309,6 +309,28 @@ class ClmapClosureSpec extends Specification {
 		then:
 		code == expected
 		code2 == expected2
+		
+		when:
+		source = '''\
+			#! clmap:test3
+			#> map:map1
+			#>> args
+				String yourName
+			#>> return
+				yourName
+			#>> closure:key1
+				yourName = "Hello, ${yourName}"
+			'''.stripIndent()
+		expected = '''\
+			{ 	String yourName ->
+				yourName = "Hello, ${yourName}"
+				return yourName
+			}
+			'''.stripIndent().denormalize()
+		server.soak(source)
+		code = server.cl('/test3/map1#key1').createCode()
+		then:
+		code == expected
 	}
 	
 	def 'createCode - exception'(){
@@ -331,40 +353,6 @@ class ClmapClosureSpec extends Specification {
 		then:
 		exc = thrown(TpacSemanticException)
 		exc.message == msgs.exc.noReturnText
-		
-		when:
-		source = '''\
-			#! clmap:test2
-			#> map:map1
-			#>> args
-				String yourName
-			#>> return
-				message
-			#>> closure:key1
-				message = 'Hello!'
-			'''.stripIndent().denormalize()
-		server.soak(source)
-		server.cl('/test2/map1#key1').createCode()
-		then:
-		exc = thrown(TpacSemanticException)
-		exc.message == String.format(msgs.exc.invadlidReturn, '	message')
-		
-		when:
-		source = '''\
-			#! clmap:test3
-			#> map:map1
-			#>> args
-				String yourName
-			#>> return
-			 
-			#>> closure:key1
-				message = 'Hello!'
-			'''.stripIndent().denormalize()
-		server.soak(source)
-		server.cl('/test3/map1#key1').createCode()
-		then:
-		exc = thrown(TpacSemanticException)
-		exc.message == String.format(msgs.exc.invadlidReturn, '')
 	}
 	
 	def 'addLineNo'(){

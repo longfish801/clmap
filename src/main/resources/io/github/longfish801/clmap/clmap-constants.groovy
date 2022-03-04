@@ -39,9 +39,9 @@ clpath {
 closure {
 	bgn = '{ '
 	arg = ' ->'
-	joinargs = ','
+	argdiv = ','
 	end = '}'
 	ret = '	return '
-	splitret = ' '
+	retdiv = ' '
 	lsep = System.lineSeparator()
 }

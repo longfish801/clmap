@@ -7,7 +7,6 @@ exc {
 	throwedClosure = 'Throwable is throwd when the closure is called.'
 	closureExc = '%s clpath=%s code=\n%s\n-----'
 	noReturnText = 'No text is specified for return handle.'
-	invadlidReturn = 'Invalid format of return handle. return=%s'
 }
 
 // ログメッセージ
