@@ -102,8 +102,8 @@ class ClmapClosure implements TeaHandle {
 		Closure writeCode
 		writeCode = { StringBuilder builder, String tag, TeaHandle hndl ->
 			if (hndl.upper != null) writeCode(builder, tag, hndl.upper)
-			if (hndl.solvePath(tag) != null){
-				String code = hndl.solvePath(tag).map.findAll {
+			if (hndl.solve(tag) != null){
+				String code = hndl.solve(tag).map.findAll {
 					(it.key == 'dflt' || it.key ==name) && it.value instanceof List
 				}.values().collect {
 					it.join(cnst.closure.lsep)
@@ -117,8 +117,8 @@ class ClmapClosure implements TeaHandle {
 		// 戻り値の宣言と変数を取得します
 		String retDef = ''
 		String retVar = ''
-		if (upper.solvePath('return') != null){
-			List returns = upper.solvePath('return').map.findAll {
+		if (upper.solve('return') != null){
+			List returns = upper.solve('return').map.findAll {
 				it.key == 'dflt' && it.value instanceof List
 			}.values() as List
 			if (returns.size() == 0) throw new TpacSemanticException(msgs.exc.noReturnText)
@@ -134,8 +134,8 @@ class ClmapClosure implements TeaHandle {
 		StringBuilder builder = new StringBuilder()
 		writeCode(builder, 'dec', this)
 		builder << cnst.closure.bgn
-		if (upper.solvePath('args') != null){
-			String args = upper.solvePath('args').map.findAll {
+		if (upper.solve('args') != null){
+			String args = upper.solve('args').map.findAll {
 				(it.key == 'dflt' || it.key == name) && it.value instanceof List
 			}.values().collect {
 				it.join(cnst.closure.argdiv)

@@ -59,7 +59,7 @@ class ClmapServerSpec extends Specification {
 		clmap1 << map1
 		
 		expect:
-		server.cl(clpath) == server.solvePath(path)
+		server.cl(clpath) == server.solve(path)
 		
 		where:
 		clpath			|| path

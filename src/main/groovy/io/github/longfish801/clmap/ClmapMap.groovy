@@ -67,7 +67,7 @@ class ClmapMap implements TeaHandle {
 		// クロージャの名前の区切り文字で開始する場合はクロージャを返します
 		if (clpath.startsWith(cnst.clpath.anchor)){
 			String clname = clpath.substring(cnst.clpath.anchor.length())
-			return solvePath("closure:${clname}")
+			return solve("closure:${clname}")
 		}
 		// パス区切り文字で分割した先頭の要素を解決します
 		if (cnst.clpath.forhandle.every { !(clpath ==~ it) }){
@@ -86,7 +86,7 @@ class ClmapMap implements TeaHandle {
 			case cnst.clpath.upper: // 上位のパスの場合
 				return (otherPath.empty)? upper : upper.cl(otherPath)
 			default: // 下位ハンドルの場合
-				def lower = solvePath("map:${firstPath}")
+				def lower = solve("map:${firstPath}")
 				return (otherPath.empty)? lower : lower?.cl(otherPath)
 		}
 	}

@@ -30,8 +30,8 @@
 	String time
 	String name
 #>> closure
-	greet = clmap.solvePath('config:messages').config().greeting[time]
-	title = clmap.solvePath('data:title').dflt[titleMap[name]]
+	greet = clmap.solve('config:messages').config().greeting[time]
+	title = clmap.solve('data:title').dflt[titleMap[name]]
 	return "${greet}, ${title}${name}."
 #>> data:title
 Mr.
@@ -129,3 +129,6 @@ dependencies {
 
 0.3.06
 : returnハンドルに変数の型も記述するよう変更しました。
+
+0.3.07
+: tpac 0.3.13に対応しました。

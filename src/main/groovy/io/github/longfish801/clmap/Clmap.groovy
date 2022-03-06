@@ -49,7 +49,7 @@ class Clmap implements TeaDec {
 			firstPath = matcher.group(1)
 			otherPath = cnst.clpath.anchor + matcher.group(2)
 		}
-		def lower = solvePath("map:${firstPath}")
+		def lower = solve("map:${firstPath}")
 		return (otherPath.empty)? lower : lower?.cl(otherPath)
 	}
 	
