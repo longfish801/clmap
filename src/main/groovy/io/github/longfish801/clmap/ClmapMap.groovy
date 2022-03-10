@@ -42,6 +42,7 @@ class ClmapMap implements TeaHandle {
 	
 	/**
 	 * クロージャパスの参照対象を返します。<br/>
+	 * クロージャ名に相当する対象が無い場合はデフォルトキーに対応する値を返します。<br/>
 	 * 絶対パスの場合は宣言に解決を依頼します。<br/>
 	 * クロージャの名前の区切り文字で開始する場合はクロージャを返します。<br/>
 	 * 相対パスの場合、パス区切り文字で分割した先頭の名前と、残りのパスに分割します。<br/>
@@ -67,7 +68,7 @@ class ClmapMap implements TeaHandle {
 		// クロージャの名前の区切り文字で開始する場合はクロージャを返します
 		if (clpath.startsWith(cnst.clpath.anchor)){
 			String clname = clpath.substring(cnst.clpath.anchor.length())
-			return solve("closure:${clname}")
+			return solve("closure:${clname}") ?: solve('closure:dflt')
 		}
 		// パス区切り文字で分割した先頭の要素を解決します
 		if (cnst.clpath.forhandle.every { !(clpath ==~ it) }){

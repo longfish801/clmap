@@ -31,6 +31,8 @@ class ClmapMapSpec extends Specification {
 		ClmapClosure cl1 = new ClmapClosure(tag: 'closure', name: 'cl1')
 		ClmapMap map10 = new ClmapMap(tag: 'map')
 		ClmapMap map11 = new ClmapMap(tag: 'map', name: 'map11')
+		ClmapClosure cl110 = new ClmapClosure(tag: 'closure')
+		ClmapClosure cl111 = new ClmapClosure(tag: 'closure', name: 'cl111')
 		ClmapMap map111 = new ClmapMap(tag: 'map', name: 'map111')
 		server << clmap
 		clmap << map1
@@ -39,6 +41,8 @@ class ClmapMapSpec extends Specification {
 		map1 << map10
 		map1 << map11
 		map11 << map111
+		map11 << cl110
+		map11 << cl111
 		
 		expect:
 		map1.cl(clpath) == server.solve(path)
@@ -48,8 +52,12 @@ class ClmapMapSpec extends Specification {
 		'/dec1'			|| '/clmap:dec1'
 		'#dflt'			|| '/clmap:dec1/map:map1/closure'
 		'#cl1'			|| '/clmap:dec1/map:map1/closure:cl1'
+		'#nosuch'		|| '/clmap:dec1/map:map1/closure'
 		'dflt'			|| '/clmap:dec1/map:map1/map'
 		'map11'			|| '/clmap:dec1/map:map1/map:map11'
+		'map11#dflt'	|| '/clmap:dec1/map:map1/map:map11/closure'
+		'map11#cl111'	|| '/clmap:dec1/map:map1/map:map11/closure:cl111'
+		'map11#nosuch'	|| '/clmap:dec1/map:map1/map:map11/closure'
 		'map11/map111'	|| '/clmap:dec1/map:map1/map:map11/map:map111'
 	}
 	
