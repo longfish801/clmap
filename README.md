@@ -44,17 +44,21 @@ import io.github.longfish801.clmap.ClmapServer
 
 def clmap
 try {
-	clmap = new ClmapServer().soak(new File('src/test/resources/sample.tpac')).cl('/dflt/dflt')
+	clmap = new ClmapServer().soak(new File('src/test/resources/sample.tpac'))
 } catch (exc){
-	exc.printStackTrace()
+	println "Failed to soak: ${exc.message}"
+	throw exc
 }
 
-clmap.properties.config = new ConfigObject()
+clmap.cl('/dflt/const').properties.titleMap = [
+	'Kennedy': 0,
+	'Thatcher': 1,
+	'Windsor': 2
+]
 
-assert 'Hello, World!' == clmap.cl('#dflt').call('World')
-assert 'Hello, world!' == clmap.cl('#key1').call('World')
-assert 'Hello, WORLD!' == clmap.cl('#key2').call('World')
-assert 'HELLO, WORLD!' == clmap.cl('#key3').call('DUMMY')
+assert 'Good morning, Mr.Kennedy.' == clmap.cl('/dflt/dflt#morning').call('Kennedy')
+assert 'HELLO, MRS.THATCHER.' == clmap.cl('/dflt/dflt#noon').call('Thatcher')
+assert 'Good night, Ms.Windsor.' == clmap.cl('/dflt/dflt#night').call('Windsor')
 ```
 
 This sample code is executed in the execSamples task, see build.gradle.

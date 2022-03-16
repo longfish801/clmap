@@ -68,7 +68,8 @@ def clmap
 try {
 	clmap = new ClmapServer().soak(new File('src/test/resources/sample.tpac'))
 } catch (exc){
-	exc.printStackTrace()
+	println "Failed to soak: ${exc.message}"
+	throw exc
 }
 
 clmap.cl('/dflt/const').properties.titleMap = [
