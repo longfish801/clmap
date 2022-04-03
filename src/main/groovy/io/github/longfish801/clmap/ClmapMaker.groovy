@@ -14,7 +14,6 @@ import io.github.longfish801.tpac.tea.TeaMaker
 
 /**
  * clmap記法の文字列の解析にともない、各要素を生成します。
- * @version 0.3.00 2020/06/11
  * @author io.github.longfish801
  */
 class ClmapMaker implements TeaMaker {

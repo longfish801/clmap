@@ -13,7 +13,6 @@ import java.util.regex.Matcher
 
 /**
  * マップです。
- * @version 0.3.00 2020/06/11
  * @author io.github.longfish801
  */
 class ClmapMap implements TeaHandle {

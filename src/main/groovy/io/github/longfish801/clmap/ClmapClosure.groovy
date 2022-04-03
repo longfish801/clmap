@@ -15,7 +15,6 @@ import org.apache.commons.lang3.StringUtils
 /**
  * クロージャです。<br/>
  * GroovyのClosureインスタンスやソースコードを保持します。
- * @version 0.3.01 2021/05/03
  * @author io.github.longfish801
  */
 @Slf4j('LOG')
@@ -75,7 +74,7 @@ class ClmapClosure implements TeaHandle {
 	Closure createClosure(){
 		if (code == null){
 			code = createCode()
-			LOG.debug("--- closure code: clpath={} ---\n{}\n---", clpath, code)
+			LOG.trace("--- closure code: clpath={} ---\n{}\n---", clpath, code)
 		}
 		Closure getProperties
 		getProperties = { def hndl ->

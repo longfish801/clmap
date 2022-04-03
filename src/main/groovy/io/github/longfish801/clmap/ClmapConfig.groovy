@@ -9,7 +9,6 @@ import io.github.longfish801.tpac.tea.TeaHandle
 
 /**
  * 設定値です。
- * @version 0.3.01 2020/10/28
  * @author io.github.longfish801
  */
 class ClmapConfig implements TeaHandle {

@@ -15,7 +15,6 @@ import spock.lang.Unroll
 
 /**
  * ClmapServerのテスト。
- * @version 0.3.00 2020/06/11
  * @author io.github.longfish801
  */
 class ClmapServerSpec extends Specification {

@@ -13,7 +13,6 @@ import java.util.regex.Matcher
 
 /**
  * 宣言です。
- * @version 0.3.00 2020/06/11
  * @author io.github.longfish801
  */
 class Clmap implements TeaDec {

@@ -10,9 +10,9 @@ No support such as troubleshooting, answering inquiries, and so on.
 
 ## Features
 
-* Define closures using the clmap notation.
-  The clmap notation is a DSL using [tpac](/tpac/).
-* You can define common arguments, import statements, etc. together.
+* Define closures using the clmap notation.  
+  The clmap notation is a DSL using [tpac](/maven/tpac/).
+* You can define common arguments, import statements, etc. together.  
   You can do dependency injection with common pre-processing and post-processing together.
 
 The name of this library comes from Closure + Map.

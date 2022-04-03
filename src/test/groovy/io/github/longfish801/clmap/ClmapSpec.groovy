@@ -12,7 +12,6 @@ import spock.lang.Unroll
 
 /**
  * Clmapのテスト。
- * @version 0.3.00 2020/06/11
  * @author io.github.longfish801
  */
 class ClmapSpec extends Specification {

@@ -14,7 +14,6 @@ import java.util.regex.Matcher
 
 /**
  * clmap文書を保持します。
- * @version 0.3.00 2020/06/11
  * @author io.github.longfish801
  */
 class ClmapServer implements TeaServer {

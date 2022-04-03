@@ -10,7 +10,6 @@ import spock.lang.Specification
 
 /**
  * ClmapConfigのテスト。
- * @version 0.3.01 2020/10/28
  * @author io.github.longfish801
  */
 class ClmapConfigSpec extends Specification {

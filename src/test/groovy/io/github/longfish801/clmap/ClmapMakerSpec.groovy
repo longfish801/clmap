@@ -14,7 +14,6 @@ import spock.lang.Unroll
 
 /**
  * ClmapMakerのテスト。
- * @version 0.3.00 2020/06/11
  * @author io.github.longfish801
  */
 class ClmapMakerSpec extends Specification {
