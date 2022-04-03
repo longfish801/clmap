@@ -9,7 +9,6 @@ import io.github.longfish801.clmap.ClmapMsg as msgs
 
 /**
  * クロージャ実行時に発生した例外を保持するための例外クラスです。
- * @version 0.3.00 2020/06/11
  * @author io.github.longfish801
  */
 class ClmapClosureCallException extends Exception {

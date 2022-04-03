@@ -5,7 +5,6 @@
  */
 package io.github.longfish801.clmap
 
-import io.github.longfish801.clmap.ClmapConst as cnst
 import io.github.longfish801.clmap.ClmapMsg as msgs
 import io.github.longfish801.tpac.TpacHandlingException
 import io.github.longfish801.tpac.TpacMaker
@@ -16,7 +15,6 @@ import spock.lang.Unroll
 
 /**
  * ClmapServerのテスト。
- * @version 0.3.00 2020/06/11
  * @author io.github.longfish801
  */
 class ClmapServerSpec extends Specification {
@@ -39,7 +37,7 @@ class ClmapServerSpec extends Specification {
 		TeaMaker maker
 		
 		when:
-		maker = server.newMaker(cnst.tags.clmap)
+		maker = server.newMaker('clmap')
 		then:
 		maker instanceof ClmapMaker
 		
@@ -60,11 +58,11 @@ class ClmapServerSpec extends Specification {
 		clmap1 << map1
 		
 		expect:
-		server.cl(clpath) == server.solvePath(path)
+		server.cl(clpath) == server.solve(path)
 		
 		where:
 		clpath			|| path
-		'/_'			|| '/clmap'
+		'/dflt'			|| '/clmap'
 		'/dec1'			|| '/clmap:dec1'
 		'/dec1/map1'	|| '/clmap:dec1/map:map1'
 	}

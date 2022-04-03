@@ -7,17 +7,18 @@ package io.github.longfish801.clmap
 
 import io.github.longfish801.clmap.ClmapConst as cnst
 import io.github.longfish801.clmap.ClmapMsg as msgs
-import io.github.longfish801.tpac.TpacConst as tpacCnst
 import io.github.longfish801.tpac.TpacHandlingException
 import io.github.longfish801.tpac.tea.TeaDec
 import java.util.regex.Matcher
 
 /**
  * 宣言です。
- * @version 0.3.00 2020/06/11
  * @author io.github.longfish801
  */
 class Clmap implements TeaDec {
+	/** この宣言配下のすべてのクロージャの大域変数として使用するプロパティ */
+	Map properties = [:]
+	
 	/**
 	 * クロージャパスの参照対象を返します。<br/>
 	 * 絶対パスの場合はサーバーに解決を依頼します。<br/>
@@ -47,7 +48,17 @@ class Clmap implements TeaDec {
 			firstPath = matcher.group(1)
 			otherPath = cnst.clpath.anchor + matcher.group(2)
 		}
-		def lower = solvePath("${cnst.tags.map}${tpacCnst.path.keyDiv}${firstPath}")
+		def lower = solve("map:${firstPath}")
 		return (otherPath.empty)? lower : lower?.cl(otherPath)
+	}
+	
+	/**
+	 * 名前を省略したmapハンドルに属する、名前を省略したclosureハンドルのクロージャを実行します。<br/>
+	 * 当該クロージャが存在しない場合はnullを返します。
+	 * @param args 可変長の引数
+	 * @return 名前を省略したハンドルのクロージャの実行結果
+	 */
+	Object call(Object... args){
+		return cl("${cnst.clpath.noname}${cnst.clpath.anchor}${cnst.clpath.noname}")?.call(*args);
 	}
 }

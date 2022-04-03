@@ -1,13 +1,33 @@
 #! clmap
+#> map:const
+#>> args
+	String time
+	String name
+#>> closure
+	greet = clmap.solve('config:messages').config().greeting[time]
+	title = clmap.solve('data:title').dflt[titleMap[name]]
+	return "${greet}, ${title}${name}."
+#>> data:title
+Mr.
+Mrs.
+Ms.
+#>> config:messages
+greeting {
+	morning = 'Good morning'
+	noon = 'Hello'
+	night = 'Good night'
+}
 #> map
 #>> args
-	String yourName
-#>> closure
-	return "Hello, ${yourName}!"
-#>> closure:key1
-	return clmap.cl('#_').call(yourName.toLowerCase())
-#>> closure:key2
-	config.msg = 'HELLO, WORLD!'
-	return clmap.cl('#_').call(yourName.toUpperCase())
-#>> closure:key3
-	return config.msg
+	String name
+#>> return
+	String message
+#>> suffix
+#-noon
+	message = message.toUpperCase()
+#>> closure:morning
+	message = clmap.cl('/dflt/const#dflt').call('morning', name)
+#>> closure:noon
+	message = clmap.cl('/dflt/const#dflt').call('noon', name)
+#>> closure:night
+	message = clmap.cl('/dflt/const#dflt').call('night', name)

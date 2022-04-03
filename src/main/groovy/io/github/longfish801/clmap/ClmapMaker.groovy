@@ -14,7 +14,6 @@ import io.github.longfish801.tpac.tea.TeaMaker
 
 /**
  * clmap記法の文字列の解析にともない、各要素を生成します。
- * @version 0.3.00 2020/06/11
  * @author io.github.longfish801
  */
 class ClmapMaker implements TeaMaker {
@@ -52,8 +51,9 @@ class ClmapMaker implements TeaMaker {
 			throw new TpacSemanticException(String.format(msgs.exc.invalidHierarchy, tag, upper.tag))
 		}
 		switch (tag) {
-			case cnst.tags.closure: return new ClmapClosure()
-			case cnst.tags.map: return new ClmapMap()
+			case 'closure': return new ClmapClosure()
+			case 'map': return new ClmapMap()
+			case 'config': return new ClmapConfig()
 		}
 		return TeaMaker.super.newTeaHandle(tag, name, upper)
 	}

@@ -12,7 +12,6 @@ import spock.lang.Unroll
 
 /**
  * Clmapのテスト。
- * @version 0.3.00 2020/06/11
  * @author io.github.longfish801
  */
 class ClmapSpec extends Specification {
@@ -30,12 +29,12 @@ class ClmapSpec extends Specification {
 		map1 << map11
 		
 		expect:
-		clmap.cl(clpath) == server.solvePath(path)
+		clmap.cl(clpath) == server.solve(path)
 		
 		where:
 		clpath			|| path
 		'/dec1'			|| '/clmap:dec1'
-		'_'				|| '/clmap:dec1/map'
+		'dflt'			|| '/clmap:dec1/map'
 		'map1'			|| '/clmap:dec1/map:map1'
 		'map1/map11'	|| '/clmap:dec1/map:map1/map:map11'
 	}

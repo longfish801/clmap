@@ -13,7 +13,7 @@
 ## 特徴
 
 * 複数のクロージャを clmap記法で定義します。
-  clmap記法は [tpac](/tpac/)を利用したDSLです。
+  clmap記法は [tpac](/maven/tpac/)を利用したDSLです。
 * 共通する引数や import文などをまとめて定義できます。
   共通する前処理、後処理をまとめることで依存性注入ができます。
 
@@ -25,18 +25,38 @@
 
 ```
 #! clmap
+#> map:const
+#>> args
+	String time
+	String name
+#>> closure
+	greet = clmap.solve('config:messages').config().greeting[time]
+	title = clmap.solve('data:title').dflt[titleMap[name]]
+	return "${greet}, ${title}${name}."
+#>> data:title
+Mr.
+Mrs.
+Ms.
+#>> config:messages
+greeting {
+	morning = 'Good morning'
+	noon = 'Hello'
+	night = 'Good night'
+}
 #> map
 #>> args
-	String yourName
-#>> closure
-	return "Hello, ${yourName}!"
-#>> closure:key1
-	return clmap.cl('#_').call(yourName.toLowerCase())
-#>> closure:key2
-	config.msg = 'HELLO, WORLD!'
-	return clmap.cl('#_').call(yourName.toUpperCase())
-#>> closure:key3
-	return config.msg
+	String name
+#>> return
+	String message
+#>> suffix
+#-noon
+	message = message.toUpperCase()
+#>> closure:morning
+	message = clmap.cl('/dflt/const#dflt').call('morning', name)
+#>> closure:noon
+	message = clmap.cl('/dflt/const#dflt').call('noon', name)
+#>> closure:night
+	message = clmap.cl('/dflt/const#dflt').call('night', name)
 ```
 
 　上記の clmap文書を読みこんでクロージャを実行し、期待する戻り値を得られるか assertで確認するスクリプトです（src/test/groovy/Sample.groovy）。
@@ -46,17 +66,21 @@ import io.github.longfish801.clmap.ClmapServer
 
 def clmap
 try {
-	clmap = new ClmapServer().soak(new File('src/test/resources/sample.tpac')).cl('/_/_')
+	clmap = new ClmapServer().soak(new File('src/test/resources/sample.tpac'))
 } catch (exc){
-	exc.printStackTrace()
+	println "Failed to soak: ${exc.message}"
+	throw exc
 }
 
-clmap.properties.config = new ConfigObject()
+clmap.cl('/dflt/const').properties.titleMap = [
+	'Kennedy': 0,
+	'Thatcher': 1,
+	'Windsor': 2
+]
 
-assert 'Hello, World!' == clmap.cl('#_').call('World')
-assert 'Hello, world!' == clmap.cl('#key1').call('World')
-assert 'Hello, WORLD!' == clmap.cl('#key2').call('World')
-assert 'HELLO, WORLD!' == clmap.cl('#key3').call('DUMMY')
+assert 'Good morning, Mr.Kennedy.' == clmap.cl('/dflt/dflt#morning').call('Kennedy')
+assert 'HELLO, MRS.THATCHER.' == clmap.cl('/dflt/dflt#noon').call('Thatcher')
+assert 'Good night, Ms.Windsor.' == clmap.cl('/dflt/dflt#night').call('Windsor')
 ```
 
 　このサンプルコードは build.gradle内の execSamplesタスクで実行しています。
@@ -85,3 +109,30 @@ dependencies {
 	implementation group: 'io.github.longfish801', name: 'clmap', version: '0.3.00'
 }
 ```
+
+## 改版履歴
+
+0.3.01
+: config, dataハンドルを追加しました。
+
+0.3.02
+: args, dec, prefix, suffix, configハンドルのマップにキー指定を可能にしました。
+
+0.3.03
+: args, dec, prefix, suffix, configハンドルのマップのキー指定はclosureハンドルの名前と一致時のみにしました。
+: returnハンドルを追加しました。
+
+0.3.04
+: ドキュメントはmavenリポジトリに出力するよう修正しました。
+
+0.3.05
+: 宣言に大域変数を設定できるよう対応しました。
+
+0.3.06
+: returnハンドルに変数の型も記述するよう変更しました。
+
+0.3.07
+: tpac 0.3.13に対応しました。
+
+0.3.08
+: clメソッドでクロージャ名に対応するハンドルがないときはデフォルトキーで参照するよう変更しました。

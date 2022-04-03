@@ -1,4 +1,4 @@
-﻿# clmap
+# clmap
 
 ## Overview
 
@@ -10,9 +10,9 @@ No support such as troubleshooting, answering inquiries, and so on.
 
 ## Features
 
-* Define closures using the clmap notation.
-  The clmap notation is a DSL using [tpac](/tpac/).
-* You can define common arguments, import statements, etc. together.
+* Define closures using the clmap notation.  
+  The clmap notation is a DSL using [tpac](/maven/tpac/).
+* You can define common arguments, import statements, etc. together.  
   You can do dependency injection with common pre-processing and post-processing together.
 
 The name of this library comes from Closure + Map.
@@ -29,10 +29,10 @@ Here is a sample clmap document (src/test/resources/sample.tpac).
 #>> closure
 	return "Hello, ${yourName}!"
 #>> closure:key1
-	return clmap.cl('#_').call(yourName.toLowerCase())
+	return clmap.cl('#dflt').call(yourName.toLowerCase())
 #>> closure:key2
 	config.msg = 'HELLO, WORLD!'
-	return clmap.cl('#_').call(yourName.toUpperCase())
+	return clmap.cl('#dflt').call(yourName.toUpperCase())
 #>> closure:key3
 	return config.msg
 ```
@@ -44,21 +44,25 @@ import io.github.longfish801.clmap.ClmapServer
 
 def clmap
 try {
-	clmap = new ClmapServer().soak(new File('src/test/resources/sample.tpac')).cl('/_/_')
+	clmap = new ClmapServer().soak(new File('src/test/resources/sample.tpac'))
 } catch (exc){
-	exc.printStackTrace()
+	println "Failed to soak: ${exc.message}"
+	throw exc
 }
 
-clmap.properties.config = new ConfigObject()
+clmap.cl('/dflt/const').properties.titleMap = [
+	'Kennedy': 0,
+	'Thatcher': 1,
+	'Windsor': 2
+]
 
-assert 'Hello, World!' == clmap.cl('#_').call('World')
-assert 'Hello, world!' == clmap.cl('#key1').call('World')
-assert 'Hello, WORLD!' == clmap.cl('#key2').call('World')
-assert 'HELLO, WORLD!' == clmap.cl('#key3').call('DUMMY')
+assert 'Good morning, Mr.Kennedy.' == clmap.cl('/dflt/dflt#morning').call('Kennedy')
+assert 'HELLO, MRS.THATCHER.' == clmap.cl('/dflt/dflt#noon').call('Thatcher')
+assert 'Good night, Ms.Windsor.' == clmap.cl('/dflt/dflt#night').call('Windsor')
 ```
 
 This sample code is executed in the execSamples task, see build.gradle.
 
 ## Next Step
 
-Please see the [documents](https://longfish801.github.io/clmap/) for more detail.
+Please see the [documents](https://longfish801.github.io/maven/clmap/) for more detail.

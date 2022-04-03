@@ -8,13 +8,13 @@ package io.github.longfish801.clmap
 import groovy.util.logging.Slf4j
 import io.github.longfish801.clmap.ClmapConst as cnst
 import io.github.longfish801.clmap.ClmapMsg as msgs
-import io.github.longfish801.tpac.TpacConst as tpacCnst
+import io.github.longfish801.tpac.TpacSemanticException
 import io.github.longfish801.tpac.tea.TeaHandle
+import org.apache.commons.lang3.StringUtils
 
 /**
  * クロージャです。<br/>
  * GroovyのClosureインスタンスやソースコードを保持します。
- * @version 0.3.00 2020/06/11
  * @author io.github.longfish801
  */
 @Slf4j('LOG')
@@ -64,8 +64,9 @@ class ClmapClosure implements TeaHandle {
 	/**
 	 * クロージャを生成します。<br/>
 	 * クロージャのソースコードを未作成であれば、作成してメンバ変数 codeに格納します。<br/>
-	 * クロージャ生成時、{@link ClmapMap}クラスのメンバ変数 propertiesを
+	 * クロージャ生成時、{@link Clmap}, {@link ClmapMap}クラスのメンバ変数 propertiesを
 	 * 大域変数として利用できるよう設定（delegateに設定）します。<br/>
+	 * 同じ大域変数名がある場合はより下位の {@link ClmapMap}クラスでの値で上書きされます。<br/>
 	 * コンパイル時に Throwableをキャッチしたならば WARNログを出力します。
 	 * @return クロージャ
 	 * @see #createCode()
@@ -73,14 +74,18 @@ class ClmapClosure implements TeaHandle {
 	Closure createClosure(){
 		if (code == null){
 			code = createCode()
-			LOG.debug("--- closure code: clpath={} ---\n{}\n---", clpath, code)
+			LOG.trace("--- closure code: clpath={} ---\n{}\n---", clpath, code)
+		}
+		Closure getProperties
+		getProperties = { def hndl ->
+			return (hndl.level == 0)? (hndl as Clmap).properties : getProperties.call(hndl.upper) + (hndl as ClmapMap).properties
 		}
 		Closure closure
 		try {
 			closure = (upper as ClmapMap).shell.evaluate(code, clpath)
-			closure.delegate = (upper as ClmapMap).properties
+			closure.delegate = getProperties.call(upper)
 		} catch (Throwable exc){
-			LOG.warn(msgs.exc.failedCompile, clpath, addLineNo(code))
+			LOG.warn(String.format(msgs.logmsg.failedCompile, clpath, addLineNo(code)))
 			throw exc
 		}
 		return closure
@@ -89,30 +94,63 @@ class ClmapClosure implements TeaHandle {
 	/**
 	 * クロージャのソースコードを生成します。
 	 * @return クロージャのソースコード
+	 * @exception TpacSemanticException returnハンドルにテキストが指定されていません。
+	 * @exception TpacSemanticException returnハンドルの指定が不正です。
 	 */
 	String createCode(){
 		Closure writeCode
 		writeCode = { StringBuilder builder, String tag, TeaHandle hndl ->
 			if (hndl.upper != null) writeCode(builder, tag, hndl.upper)
-			if (hndl.solvePath(tag) != null){
-				builder << hndl.solvePath(tag).getAt(tpacCnst.dflt.mapKey).join(System.lineSeparator())
-				builder << System.lineSeparator()
+			if (hndl.solve(tag) != null){
+				String code = hndl.solve(tag).map.findAll {
+					(it.key == 'dflt' || it.key ==name) && it.value instanceof List
+				}.values().collect {
+					it.join(cnst.closure.lsep)
+				}.join(cnst.closure.lsep)
+				if (code.length() > 0){
+					builder << code
+					builder << cnst.closure.lsep
+				}
 			}
 		}
+		// 戻り値の宣言と変数を取得します
+		String retDef = ''
+		String retVar = ''
+		if (upper.solve('return') != null){
+			List returns = upper.solve('return').map.findAll {
+				it.key == 'dflt' && it.value instanceof List
+			}.values() as List
+			if (returns.size() == 0) throw new TpacSemanticException(msgs.exc.noReturnText)
+			retDef = StringUtils.trim(returns.first().first())
+			if (retDef.indexOf(cnst.closure.retdiv) < 0){
+				retVar = retDef
+				retDef = ''
+			} else {
+				retVar = retDef.split(cnst.closure.retdiv).last()
+			}
+		}
+		// クロージャのソースコードを生成します
 		StringBuilder builder = new StringBuilder()
-		writeCode(builder, cnst.tags.dec, this)
+		writeCode(builder, 'dec', this)
 		builder << cnst.closure.bgn
-		if (upper.solvePath(cnst.tags.args) != null){
-			builder << upper.solvePath(cnst.tags.args).getAt(tpacCnst.dflt.mapKey).join(System.lineSeparator())
+		if (upper.solve('args') != null){
+			String args = upper.solve('args').map.findAll {
+				(it.key == 'dflt' || it.key == name) && it.value instanceof List
+			}.values().collect {
+				it.join(cnst.closure.argdiv)
+			}.join(cnst.closure.argdiv)
+			if (args.length() > 0) builder << args
 		}
 		builder << cnst.closure.arg
-		builder << System.lineSeparator()
-		writeCode(builder, cnst.tags.prefix, this)
-		builder << getAt(tpacCnst.dflt.mapKey).join(System.lineSeparator())
-		builder << System.lineSeparator()
-		writeCode(builder, cnst.tags.suffix, this)
+		builder << cnst.closure.lsep
+		if (!retDef.empty) builder << "${retDef}${cnst.closure.lsep}"
+		writeCode(builder, 'prefix', this)
+		builder << dflt.join(cnst.closure.lsep)
+		builder << cnst.closure.lsep
+		writeCode(builder, 'suffix', this)
+		if (!retVar.empty) builder << "${cnst.closure.ret}${retVar}${cnst.closure.lsep}"
 		builder << cnst.closure.end
-		builder << System.lineSeparator()
+		builder << cnst.closure.lsep
 		return builder.toString()
 	}
 	
