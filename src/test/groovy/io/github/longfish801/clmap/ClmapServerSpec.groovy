@@ -31,7 +31,7 @@ class ClmapServerSpec extends Specification {
 		when:
 		server = new ClmapServer(ClmapServerSpec.class.classLoader)
 		then:
-		ClmapMap.loader == ClmapServerSpec.class.classLoader
+		Clmap.loader == ClmapServerSpec.class.classLoader
 	}
 	
 	def 'newMaker'(){

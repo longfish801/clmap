@@ -95,7 +95,7 @@ class ClmapClosure implements TeaHandle {
 		}
 		Closure closure
 		try {
-			closure = (upper as ClmapMap).shell.evaluate(code, clpath)
+			closure = (dec as Clmap).shell.evaluate(code, clpath)
 			closure.delegate = getProperties.call(upper)
 		} catch (Throwable exc){
 			LOG.warn(String.format(msgs.logmsg.failedCompile, clpath, addLineNo(code)))

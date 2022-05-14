@@ -18,10 +18,6 @@ import java.util.regex.Matcher
  */
 @Slf4j('LOG')
 class ClmapMap implements TeaHandle {
-	/** ClassLoader */
-	static ClassLoader loader
-	/** GroovyShell */
-	GroovyShell shell
 	/**
 	 * 各クロージャの大域変数として使用するプロパティ。<br/>
 	 * デフォルトでキー'clmap'に対し値として自インスタンスを保持します。
@@ -30,7 +26,7 @@ class ClmapMap implements TeaHandle {
 	
 	/**
 	 * 再帰的に下位のハンドルも含めてクローンします。<br/>
-	 * 大域変数のプロパティの各値はシャローコピーします。
+	 * 大域変数のプロパティは各値をシャローコピーします。
 	 * @return クローン
 	 */
 	@Override
@@ -38,19 +34,6 @@ class ClmapMap implements TeaHandle {
 		ClmapMap cloned = (ClmapMap) TeaHandle.super.cloneRecursive()
 		cloned.properties = properties.collectEntries { String key, def val -> [key, val] }
 		return cloned
-	}
-	
-	/**
-	 * コンストラクタ。<br/>
-	 * メンバ変数 loaderが nullのときは
-	 * ClmapMap.class.classLoaderで初期化します。<br/>
-	 * メンバ変数 shellを初期化します。<br/>
-	 * GroovyShellのコンストラクタには引数としてメンバ変数loaderを渡します。
-	 * @return 自インスタンス
-	 */
-	ClmapMap(){
-		if (loader == null) loader = ClmapMap.class.classLoader
-		shell = new GroovyShell(loader)
 	}
 	
 	/**

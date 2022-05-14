@@ -19,12 +19,28 @@ import java.util.regex.Matcher
  */
 @Slf4j('LOG')
 class Clmap implements TeaDec {
+	/** ClassLoader */
+	static ClassLoader loader
+	/** GroovyShell */
+	GroovyShell shell
 	/** この宣言配下のすべてのクロージャの大域変数として使用するプロパティ */
 	Map properties = [:]
 	
 	/**
+	 * コンストラクタ。<br/>
+	 * メンバ変数 shellを初期化します。GroovyShellのコンストラクタには
+	 * 引数としてメンバ変数loaderを渡します。<br/>
+	 * メンバ変数 loaderが nullのときは
+	 * Clmap.class.classLoaderで初期化します。
+	 */
+	Clmap(){
+		shell = new GroovyShell(loader ?: Clmap.class.classLoader)
+	}
+	
+	/**
 	 * 再帰的に下位のハンドルも含めてクローンします。<br/>
-	 * 大域変数のプロパティの各値はシャローコピーします。
+	 * shellはシャローコピーします。<br/>
+	 * 大域変数のプロパティは各値をシャローコピーします。
 	 * @return クローン
 	 */
 	@Override

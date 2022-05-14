@@ -142,3 +142,6 @@ dependencies {
 
 1.1.01
 : Clmap、ClmapMap、ClmapClosureクラスについてクローン作成に対応しました。
+
+1.1.02
+: GroovyShellはClmapMapではなくClmapで保持するよう修正しました。

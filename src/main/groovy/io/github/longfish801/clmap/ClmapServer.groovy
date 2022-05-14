@@ -26,12 +26,12 @@ class ClmapServer implements TeaServer {
 	
 	/**
 	 * コンストラクタ。<br/>
-	 * 引数loaderを {@link ClmapMap}のメンバ変数 loaderに設定します。
+	 * 引数loaderを {@link Clmap}のメンバ変数 loaderに設定します。
 	 * @param loader ClassLoader
 	 * @return 自インスタンス
 	 */
 	ClmapServer(ClassLoader loader){
-		ClmapMap.loader = loader
+		Clmap.loader = loader
 	}
 	
 	/**

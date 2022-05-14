@@ -15,11 +15,6 @@ import spock.lang.Unroll
  * @author io.github.longfish801
  */
 class ClmapMapSpec extends Specification {
-	def 'ClmapMap'(){
-		expect:
-		new ClmapMap().shell instanceof GroovyShell
-	}
-	
 	@Unroll
 	def 'cl'(){
 		given:
