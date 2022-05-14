@@ -25,6 +25,19 @@ class ClmapClosure implements TeaHandle {
 	Closure closure
 	
 	/**
+	 * 再帰的に下位のハンドルも含めてクローンします。<br/>
+	 * ソースコード、クロージャはnullを格納します。
+	 * @return クローン
+	 */
+	@Override
+	ClmapClosure cloneRecursive(){
+		ClmapClosure cloned = (ClmapClosure) TeaHandle.super.cloneRecursive()
+		cloned.code = null
+		cloned.closure = null
+		return cloned
+	}
+	
+	/**
 	 * 絶対クロージャパスを返します。
 	 * @return 絶対クロージャパス
 	 */

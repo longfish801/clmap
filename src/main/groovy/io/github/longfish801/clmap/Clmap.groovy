@@ -5,19 +5,34 @@
  */
 package io.github.longfish801.clmap
 
+import groovy.util.logging.Slf4j
 import io.github.longfish801.clmap.ClmapConst as cnst
 import io.github.longfish801.clmap.ClmapMsg as msgs
 import io.github.longfish801.tpac.TpacHandlingException
 import io.github.longfish801.tpac.tea.TeaDec
+import io.github.longfish801.tpac.tea.TeaHandle
 import java.util.regex.Matcher
 
 /**
  * 宣言です。
  * @author io.github.longfish801
  */
+@Slf4j('LOG')
 class Clmap implements TeaDec {
 	/** この宣言配下のすべてのクロージャの大域変数として使用するプロパティ */
 	Map properties = [:]
+	
+	/**
+	 * 再帰的に下位のハンドルも含めてクローンします。<br/>
+	 * 大域変数のプロパティの各値はシャローコピーします。
+	 * @return クローン
+	 */
+	@Override
+	Clmap cloneRecursive(){
+		Clmap cloned = (Clmap) TeaDec.super.cloneRecursive()
+		cloned.properties = properties.collectEntries { String key, def val -> [key, val] }
+		return cloned
+	}
 	
 	/**
 	 * クロージャパスの参照対象を返します。<br/>

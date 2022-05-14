@@ -5,6 +5,7 @@
  */
 package io.github.longfish801.clmap
 
+import groovy.util.logging.Slf4j
 import io.github.longfish801.clmap.ClmapMsg as msgs
 import io.github.longfish801.tpac.TpacHandlingException
 import io.github.longfish801.tpac.TpacMaker
@@ -17,6 +18,7 @@ import spock.lang.Unroll
  * ClmapServerのテスト。
  * @author io.github.longfish801
  */
+@Slf4j('LOG')
 class ClmapServerSpec extends Specification {
 	/** ClmapServer */
 	@Shared ClmapServer server
@@ -76,5 +78,37 @@ class ClmapServerSpec extends Specification {
 		then:
 		exc = thrown(TpacHandlingException)
 		exc.message == String.format(msgs.exc.invalidClpath, 'x')
+	}
+	
+	def 'clone'(){
+		given:
+		Clmap clmap
+		Clmap cloned
+		
+		when:
+		clmap = server.soak('''\
+				#! clmap:clone
+				#> map
+				#>> return
+					String result
+				#>> closure
+					result = "${prop} - ${propu} - ${propa} - ${mprop} - ${mpropu} - ${mpropa}"
+			'''.stripIndent())['clmap:clone']
+		clmap.properties['prop'] = 'val'
+		clmap.properties['propu'] = 'valu'
+		clmap.cl('/clone/dflt').properties['mprop'] = 'mval'
+		clmap.cl('/clone/dflt').properties['mpropu'] = 'mvalu'
+		cloned = clmap.clone()
+		cloned.properties['propu'] = 'valuc'
+		cloned.properties['propa'] = 'valac'
+		cloned.cl('/clone/dflt').properties['mpropu'] = 'mvaluc'
+		cloned.cl('/clone/dflt').properties['mpropa'] = 'mvalac'
+		clmap.properties['propu'] = 'valuo'
+		clmap.properties['propa'] = 'vala'
+		clmap.cl('/clone/dflt').properties['mpropu'] = 'mvaluo'
+		clmap.cl('/clone/dflt').properties['mpropa'] = 'mvala'
+		then:
+		clmap.cl('dflt#dflt').call() == 'val - valuo - vala - mval - mvaluo - mvala'
+		cloned.cl('dflt#dflt').call() == 'val - valuc - valac - mval - mvaluc - mvalac'
 	}
 }

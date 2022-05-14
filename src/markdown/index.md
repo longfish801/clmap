@@ -139,3 +139,6 @@ dependencies {
 
 1.1.00
 : gradle 7.4の記法に対応しました。
+
+1.1.01
+: Clmap、ClmapMap、ClmapClosureクラスについてクローン作成に対応しました。

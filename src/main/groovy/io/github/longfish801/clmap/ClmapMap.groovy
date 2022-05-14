@@ -5,6 +5,7 @@
  */
 package io.github.longfish801.clmap
 
+import groovy.util.logging.Slf4j
 import io.github.longfish801.clmap.ClmapConst as cnst
 import io.github.longfish801.clmap.ClmapMsg as msgs
 import io.github.longfish801.tpac.TpacHandlingException
@@ -15,6 +16,7 @@ import java.util.regex.Matcher
  * マップです。
  * @author io.github.longfish801
  */
+@Slf4j('LOG')
 class ClmapMap implements TeaHandle {
 	/** ClassLoader */
 	static ClassLoader loader
@@ -25,6 +27,18 @@ class ClmapMap implements TeaHandle {
 	 * デフォルトでキー'clmap'に対し値として自インスタンスを保持します。
 	 */
 	Map properties = [(cnst.map.dflt): this]
+	
+	/**
+	 * 再帰的に下位のハンドルも含めてクローンします。<br/>
+	 * 大域変数のプロパティの各値はシャローコピーします。
+	 * @return クローン
+	 */
+	@Override
+	ClmapMap cloneRecursive(){
+		ClmapMap cloned = (ClmapMap) TeaHandle.super.cloneRecursive()
+		cloned.properties = properties.collectEntries { String key, def val -> [key, val] }
+		return cloned
+	}
 	
 	/**
 	 * コンストラクタ。<br/>
