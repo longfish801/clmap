@@ -33,6 +33,7 @@ class ClmapMap implements TeaHandle {
 	ClmapMap cloneRecursive(){
 		ClmapMap cloned = (ClmapMap) TeaHandle.super.cloneRecursive()
 		cloned.properties = properties.collectEntries { String key, def val -> [key, val] }
+		cloned.properties[(cnst.map.dflt)] = cloned
 		return cloned
 	}
 	

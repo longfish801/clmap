@@ -93,22 +93,37 @@ class ClmapServerSpec extends Specification {
 					String result
 				#>> closure
 					result = "${prop} - ${propu} - ${propa} - ${mprop} - ${mpropu} - ${mpropa}"
+				#>> closure:recall
+					result = clmap.cl('/clone/called#dflt').call()
+				#> map:called
+				#>> return
+					String result
+				#>> closure
+					result = "${prop} - ${propu} - ${propa} - ${mprop} - ${mpropu} - ${mpropa}"
 			'''.stripIndent())['clmap:clone']
 		clmap.properties['prop'] = 'val'
 		clmap.properties['propu'] = 'valu'
 		clmap.cl('/clone/dflt').properties['mprop'] = 'mval'
 		clmap.cl('/clone/dflt').properties['mpropu'] = 'mvalu'
+		clmap.cl('/clone/called').properties['mprop'] = 'cmval'
+		clmap.cl('/clone/called').properties['mpropu'] = 'cmvalu'
 		cloned = clmap.clone()
 		cloned.properties['propu'] = 'valuc'
 		cloned.properties['propa'] = 'valac'
 		cloned.cl('/clone/dflt').properties['mpropu'] = 'mvaluc'
 		cloned.cl('/clone/dflt').properties['mpropa'] = 'mvalac'
+		cloned.cl('/clone/called').properties['mpropu'] = 'cmvaluc'
+		cloned.cl('/clone/called').properties['mpropa'] = 'cmvalac'
 		clmap.properties['propu'] = 'valuo'
 		clmap.properties['propa'] = 'vala'
 		clmap.cl('/clone/dflt').properties['mpropu'] = 'mvaluo'
 		clmap.cl('/clone/dflt').properties['mpropa'] = 'mvala'
+		clmap.cl('/clone/called').properties['mpropu'] = 'cmvaluo'
+		clmap.cl('/clone/called').properties['mpropa'] = 'cmvala'
 		then:
 		clmap.cl('dflt#dflt').call() == 'val - valuo - vala - mval - mvaluo - mvala'
 		cloned.cl('dflt#dflt').call() == 'val - valuc - valac - mval - mvaluc - mvalac'
+		clmap.cl('dflt#recall').call() == 'val - valuo - vala - cmval - cmvaluo - cmvala'
+		cloned.cl('dflt#recall').call() == 'val - valuc - valac - cmval - cmvaluc - cmvalac'
 	}
 }
