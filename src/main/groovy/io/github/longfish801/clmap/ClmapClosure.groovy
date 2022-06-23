@@ -116,9 +116,9 @@ class ClmapClosure implements TeaHandle {
 			if (hndl.upper != null) writeCode(builder, tag, hndl.upper)
 			if (hndl.solve(tag) != null){
 				String code = hndl.solve(tag).map.findAll {
-					(it.key == 'dflt' || it.key ==name) && it.value instanceof List
-				}.values().collect {
-					it.join(cnst.closure.lsep)
+					(it.key == 'dflt' || it.key == name) && it.value instanceof List
+				}.keySet().collect {
+					hndl.solve(tag).asString(it)
 				}.join(cnst.closure.lsep)
 				if (code.length() > 0){
 					builder << code

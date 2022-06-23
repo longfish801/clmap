@@ -145,3 +145,6 @@ dependencies {
 
 1.1.02
 : GroovyShellはClmapMapではなくClmapで保持するよう修正しました。
+
+1.1.03
+: TeaHandle#asStringを利用するよう処理を見直しました。
