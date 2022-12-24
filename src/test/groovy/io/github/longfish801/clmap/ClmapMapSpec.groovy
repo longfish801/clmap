@@ -44,12 +44,12 @@ class ClmapMapSpec extends Specification {
 		where:
 		clpath			|| path
 		'/dec1'			|| '/clmap:dec1'
-		'#dflt'			|| '/clmap:dec1/map:map1/closure'
+		'#'				|| '/clmap:dec1/map:map1/closure'
 		'#cl1'			|| '/clmap:dec1/map:map1/closure:cl1'
 		'#nosuch'		|| '/clmap:dec1/map:map1/closure'
 		'dflt'			|| '/clmap:dec1/map:map1/map'
 		'map11'			|| '/clmap:dec1/map:map1/map:map11'
-		'map11#dflt'	|| '/clmap:dec1/map:map1/map:map11/closure'
+		'map11#'		|| '/clmap:dec1/map:map1/map:map11/closure'
 		'map11#cl111'	|| '/clmap:dec1/map:map1/map:map11/closure:cl111'
 		'map11#nosuch'	|| '/clmap:dec1/map:map1/map:map11/closure'
 		'map11/map111'	|| '/clmap:dec1/map:map1/map:map11/map:map111'

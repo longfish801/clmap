@@ -38,7 +38,7 @@ class ClmapClosure implements TeaHandle {
 	}
 	
 	/**
-	 * 絶対クロージャパスを返します。
+	 * このハンドルを指す絶対クロージャパスを返します。
 	 * @return 絶対クロージャパス
 	 */
 	String getClpath(){
@@ -48,17 +48,18 @@ class ClmapClosure implements TeaHandle {
 				? "${cnst.clpath.level}${hndl.name}"
 				: "${getClpathRecursive(hndl.upper)}${cnst.clpath.level}${hndl.name}"
 		}
-		return "${getClpathRecursive(upper)}${cnst.clpath.anchor}${name}"
+		String clname = (name == 'dflt')? cnst.clpath.noname.cl : name
+		return "${getClpathRecursive(upper)}${cnst.clpath.anchor}${clname}"
 	}
 	
 	/**
 	 * クロージャを実行します。<br/>
 	 * クロージャを未作成であれば、作成してメンバ変数 closureに格納します。<br/>
-	 * Throwableをキャッチしたならば ClmapClosureCallExceptionに置き換えます。<br/>
-	 * ただし ClmapClosureCallException自身を置き換えることはしません。
+	 * Throwableをキャッチしたならば ClmapCallExceptionに置き換えます。<br/>
+	 * ただし ClmapCallException自身を置き換えることはしません。
 	 * @param args 実行時可変長引数
 	 * @return 実行結果
-	 * @throws ClmapClosureCallException クロージャ呼出時に例外あるいはエラーが投げられました。
+	 * @throws ClmapCallException クロージャ呼出時に例外あるいはエラーが投げられました。
 	 * @see #createClosure()
 	 */
 	Object call(Object... args){
@@ -66,10 +67,10 @@ class ClmapClosure implements TeaHandle {
 		try {
 			if (closure == null) closure = createClosure()
 			result = closure.call(*args)
-		} catch (ClmapClosureCallException exc){
+		} catch (ClmapCallException exc){
 			throw exc
 		} catch (Throwable exc){
-			throw new ClmapClosureCallException(msgs.exc.throwedClosure, exc, this)
+			throw new ClmapCallException(msgs.exc.throwedClosure, exc, this)
 		}
 		return result
 	}
@@ -91,14 +92,16 @@ class ClmapClosure implements TeaHandle {
 		}
 		Closure getProperties
 		getProperties = { def hndl ->
-			return (hndl.level == 0)? (hndl as Clmap).properties : getProperties.call(hndl.upper) + (hndl as ClmapMap).properties
+			return (hndl.level == 0)
+				? (hndl as Clmap).properties
+				: getProperties.call(hndl.upper) + (hndl as ClmapMap).properties
 		}
 		Closure closure
 		try {
 			closure = (dec as Clmap).shell.evaluate(code, clpath)
 			closure.delegate = getProperties.call(upper)
 		} catch (Throwable exc){
-			LOG.warn(String.format(msgs.logmsg.failedCompile, clpath, addLineNo(code)))
+			LOG.warn(String.format(msgs.logmsg.failedCompile, clpath, ClmapCallException.addLineNo(code)))
 			throw exc
 		}
 		return closure
@@ -111,30 +114,41 @@ class ClmapClosure implements TeaHandle {
 	 * @exception TpacSemanticException returnハンドルの指定が不正です。
 	 */
 	String createCode(){
-		Closure writeCode
-		writeCode = { StringBuilder builder, String tag, TeaHandle hndl ->
-			if (hndl.upper != null) writeCode(builder, tag, hndl.upper)
-			if (hndl.solve(tag) != null){
-				String code = hndl.solve(tag).map.findAll {
-					(it.key == 'dflt' || it.key == name) && it.value instanceof List
-				}.keySet().collect {
-					hndl.solve(tag).asString(it)
-				}.join(cnst.closure.lsep)
-				if (code.length() > 0){
-					builder << code
-					builder << cnst.closure.lsep
-				}
+		// 指定したキーが存在すればその値を最上位のハンドルから順に文字列連結するクロージャです
+		Closure appendKey
+		appendKey = { List lines, String key, TeaHandle hndl ->
+			if (hndl.level > 0) appendKey(lines, key, hndl.upper)
+			if (hndl[key] == null) return
+			if (!(hndl[key] instanceof List)){
+				throw new TpacSemanticException(String.format(msgs.exc.notText, key, hndl.tag))
 			}
+			lines.addAll(hndl[key])
 		}
-		// 戻り値の宣言と変数を取得します
+		// 指定されたキーの値を自ハンドル、親、さらに上位へ探していくクロージャです
+		Closure getKey
+		getKey = { String key, TeaHandle hndl ->
+			if (hndl[key] == null){
+				return (hndl.level > 0)? getKey(key, hndl.upper) : null
+			}
+			if (!(hndl[key] instanceof List)){
+				throw new TpacSemanticException(String.format(msgs.exc.notText, key, hndl.tag))
+			}
+			return hndl[key]
+		}
+		// 引数の文字列を作成します
+		String argStr = ''
+		List args = getKey('args', this)
+		if (args != null){
+			argStr = args.collect {
+				StringUtils.trim(it)
+			}.join(cnst.closure.argdiv)
+		}
+		// 戻り値の文字列を作成します
 		String retDef = ''
 		String retVar = ''
-		if (upper.solve('return') != null){
-			List returns = upper.solve('return').map.findAll {
-				it.key == 'dflt' && it.value instanceof List
-			}.values() as List
-			if (returns.size() == 0) throw new TpacSemanticException(msgs.exc.noReturnText)
-			retDef = StringUtils.trim(returns.first().first())
+		List rets = getKey('return', this)
+		if (rets != null){
+			retDef = StringUtils.trim(rets.first())
 			if (retDef.indexOf(cnst.closure.retdiv) < 0){
 				retVar = retDef
 				retDef = ''
@@ -143,52 +157,18 @@ class ClmapClosure implements TeaHandle {
 			}
 		}
 		// クロージャのソースコードを生成します
-		StringBuilder builder = new StringBuilder()
-		writeCode(builder, 'dec', this)
-		builder << cnst.closure.bgn
-		if (upper.solve('args') != null){
-			String args = upper.solve('args').map.findAll {
-				(it.key == 'dflt' || it.key == name) && it.value instanceof List
-			}.values().collect {
-				it.join(cnst.closure.argdiv)
-			}.join(cnst.closure.argdiv)
-			if (args.length() > 0) builder << args
+		List lines = []
+		appendKey(lines, 'dec', this)
+		lines << "${cnst.closure.bgn}${argStr}${cnst.closure.arg}"
+		if (!retDef.empty) lines << retDef
+		appendKey(lines, 'prefix', this)
+		if (getAt('dflt') == null || !(getAt('dflt') instanceof List)){
+			throw new TpacSemanticException(String.format(msgs.exc.notText, 'dflt', tag))
 		}
-		builder << cnst.closure.arg
-		builder << cnst.closure.lsep
-		if (!retDef.empty) builder << "${retDef}${cnst.closure.lsep}"
-		writeCode(builder, 'prefix', this)
-		builder << dflt.join(cnst.closure.lsep)
-		builder << cnst.closure.lsep
-		writeCode(builder, 'suffix', this)
-		if (!retVar.empty) builder << "${cnst.closure.ret}${retVar}${cnst.closure.lsep}"
-		builder << cnst.closure.end
-		builder << cnst.closure.lsep
-		return builder.toString()
-	}
-	
-	/**
-	 * 各行の先頭に行番号を付与して返します。<br/>
-	 * 改行コードはシステム固有の値を使用します。
-	 * @param text 文字列
-	 * @return 先頭に行番号を付与した文字列
-	 * @see #addLineNo(List<String>)
-	 */
-	static String addLineNo(String text) {
-		return addLineNo(text.normalize().split(/\n/) as List).join(System.lineSeparator())
-	}
-	
-	/**
-	 * 各行の先頭に行番号を付与して返します。<br/>
-	 * 行番号の先頭は０埋めします。行番号と各行の間は半角スペースで連結します。<br/>
-	 * 末尾に改行コードの連続があっても無視します。<br/>
-	 * 空文字や、改行コードの連続のみを渡された場合は、空文字を返します。
-	 * @param lines 文字列リスト
-	 * @return 先頭に行番号を付与した文字列リスト
-	 */
-	static List<String> addLineNo(List<String> lines) {
-		int digitNum = lines.size.toString().length()
-		int idx = 0
-		return lines.collect { String.format("%0${digitNum}d %s", ++ idx, it) }
+		lines.addAll(getAt('dflt'))
+		appendKey(lines, 'suffix', this)
+		if (!retVar.empty) lines << "${cnst.closure.ret}${retVar}"
+		lines << cnst.closure.end
+		return lines.join(cnst.closure.lsep)
 	}
 }

@@ -43,7 +43,7 @@ class ClmapMaker implements TeaMaker {
 	 */
 	@Override
 	TeaHandle newTeaHandle(String tag, String name, TeaHandle upper){
-		if (!cnst.validtags.contains(tag)){
+		if (!cnst.handles.contains(tag)){
 			throw new TpacSemanticException(String.format(msgs.exc.invalidTag, tag))
 		}
 		if (cnst.hierarchy.get(upper.tag) != null

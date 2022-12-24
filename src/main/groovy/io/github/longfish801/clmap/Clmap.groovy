@@ -24,7 +24,7 @@ class Clmap implements TeaDec {
 	/** GroovyShell */
 	GroovyShell shell
 	/** この宣言配下のすべてのクロージャの大域変数として使用するプロパティ */
-	Map properties = [:]
+	Map properties = [(cnst.map.dflt): this]
 	
 	/**
 	 * コンストラクタ。<br/>
@@ -53,8 +53,10 @@ class Clmap implements TeaDec {
 	/**
 	 * クロージャパスの参照対象を返します。<br/>
 	 * 絶対パスの場合はサーバーに解決を依頼します。<br/>
+	 * クロージャの名前の区切り文字で開始する場合はクロージャを返します。<br/>
 	 * 相対パスの場合、パス区切り文字で分割した先頭の名前と、残りのパスに分割します。<br/>
 	 * このとき、統語的にありえないパスの場合は例外を投げます。<br/>
+	 * 先頭の要素が上位のパスの場合は例外を投げます。<br/>
 	 * 先頭の要素にマップ名とクロージャ名がある場合、マップ名を先頭の要素に、クロージャ名を残りのパスに分割します。<br/>
 	 * 残りのパスがなければ、名前が一致する下位のマップを返します。<br/>
 	 * 残りのパスがあれば、それを新たなパスとして名前が一致する下位のマップに依頼します。<br/>
@@ -66,6 +68,11 @@ class Clmap implements TeaDec {
 	def cl(String clpath){
 		// 絶対パスの場合はサーバーに解決を依頼します
 		if (clpath.startsWith(cnst.clpath.level)) return server.cl(clpath)
+		// クロージャの名前の区切り文字で開始する場合はクロージャを返します
+		if (clpath.startsWith(cnst.clpath.anchor)){
+			String clname = clpath.substring(cnst.clpath.anchor.length())
+			return solve("closure:${clname}") ?: solve('closure:dflt')
+		}
 		// パス区切り文字で分割した先頭の要素を解決します
 		if (cnst.clpath.fordec.every { !(clpath ==~ it) }){
 			throw new TpacHandlingException(String.format(msgs.exc.invalidClpath, clpath))
@@ -79,17 +86,25 @@ class Clmap implements TeaDec {
 			firstPath = matcher.group(1)
 			otherPath = cnst.clpath.anchor + matcher.group(2)
 		}
+		if (firstPath == cnst.clpath.upper){	// 上位のパスの場合
+			throw new TpacHandlingException(String.format(msgs.exc.invalidClpath, clpath))
+		}
 		def lower = solve("map:${firstPath}")
 		return (otherPath.empty)? lower : lower?.cl(otherPath)
 	}
 	
 	/**
-	 * 名前を省略したmapハンドルに属する、名前を省略したclosureハンドルのクロージャを実行します。<br/>
+	 * 宣言の直下にある、名前を省略したclosureハンドルのクロージャを実行します。<br/>
 	 * 当該クロージャが存在しない場合はnullを返します。
 	 * @param args 可変長の引数
 	 * @return 名前を省略したハンドルのクロージャの実行結果
 	 */
 	Object call(Object... args){
-		return cl("${cnst.clpath.noname}${cnst.clpath.anchor}${cnst.clpath.noname}")?.call(*args);
+		String clpath = "${cnst.clpath.anchor}${cnst.clpath.noname.cl}"
+		def cl = cl(clpath)
+		if (cl == null){
+			throw new TpacHandlingException(String.format(msgs.exc.invalidClpath, clpath))
+		}
+		return cl.call(*args);
 	}
 }

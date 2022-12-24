@@ -89,14 +89,14 @@ class ClmapServerSpec extends Specification {
 		clmap = server.soak('''\
 				#! clmap:clone
 				#> map
-				#>> return
+				#-return
 					String result
 				#>> closure
 					result = "${prop} - ${propu} - ${propa} - ${mprop} - ${mpropu} - ${mpropa}"
 				#>> closure:recall
 					result = clmap.cl('/clone/called#dflt').call()
 				#> map:called
-				#>> return
+				#-return
 					String result
 				#>> closure
 					result = "${prop} - ${propu} - ${propa} - ${mprop} - ${mpropu} - ${mpropa}"

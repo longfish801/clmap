@@ -1,11 +1,14 @@
 
-// 妥当なタグ
-validtags = [ 'map', 'closure', 'args', 'return', 'dec', 'prefix', 'suffix', 'data', 'config' ]
+// 指定可能なハンドル名
+handles = [ 'map', 'closure', 'data', 'config' ]
 
-// タグ間の親子関係（キーが親タグ、値は可能な子タグのリスト）
+// 親子関係（キーが親ハンドル、値は可能な子ハンドルのリスト）
 hierarchy {
-	clmap = [ 'map', 'dec', 'prefix', 'suffix', 'data', 'config' ]
-	map = [ 'map', 'closure', 'args', 'return', 'dec', 'prefix', 'suffix', 'data', 'config' ]
+	clmap = [ 'map', 'closure', 'data', 'config' ]
+	map = [ 'map', 'closure', 'data', 'config' ]
+	closure = []
+	data = []
+	config = []
 }
 
 // マップ
@@ -19,9 +22,12 @@ clpath {
 	level = '/'
 	anchor = '#'
 	upper = '..'
-	noname = 'dflt'
+	noname {
+		map = 'dflt'
+		cl = ''
+	}
 	forserver = [
-		/\/([^#\/:]+)/,
+		/\/([^\/:]+)/,
 		/\/([^#\/:]+)\/(.+)/
 	]
 	fordec = [
@@ -32,16 +38,19 @@ clpath {
 		/([^\/:]+)/,
 		/([^#\/:]+)\/(.+)/
 	]
-	closures = /([^#\/:]+)#([^#\/:]+)/
+	closures = /([^#\/:]+)#([^#\/:]*)/
 }
 
 // クロージャ
 closure {
 	bgn = '{ '
 	arg = ' ->'
-	argdiv = ','
+	argdiv = ', '
 	end = '}'
 	ret = '	return '
 	retdiv = ' '
 	lsep = System.lineSeparator()
 }
+
+// NULLを意味する文字列
+nulltext = '<NULL_TEXT>'

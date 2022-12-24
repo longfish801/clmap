@@ -52,7 +52,7 @@ class ClmapClosureSpec extends Specification {
 		map1 << map11
 		map11 << cl111
 		then:
-		cl111.clpath == '/dflt/dflt/dflt#dflt'
+		cl111.clpath == '/dflt/dflt/dflt#'
 	}
 	
 	def 'call'(){
@@ -83,7 +83,7 @@ class ClmapClosureSpec extends Specification {
 		Clmap clmap = new Clmap(tag: 'clmap', name: 'dec1')
 		ClmapMap map1 = new ClmapMap(tag: 'map', name: 'map1')
 		ClmapClosure clclosure
-		ClmapClosureCallException exc
+		ClmapCallException exc
 		server << clmap
 		clmap << map1
 		
@@ -93,12 +93,12 @@ class ClmapClosureSpec extends Specification {
 		clclosure.code = '{ -> 1 / 0 }'
 		clclosure.call()
 		then:
-		exc = thrown(ClmapClosureCallException)
+		exc = thrown(ClmapCallException)
 		exc.localizedMessage == String.format(
 			msgs.exc.closureExc,
 			msgs.exc.throwedClosure,
 			clclosure.clpath,
-			ClmapClosure.addLineNo(clclosure.code))
+			ClmapCallException.addLineNo(clclosure.code))
 		
 		when: 'クロージャのコンパイル時に例外'
 		clclosure = new ClmapClosure()
@@ -106,12 +106,12 @@ class ClmapClosureSpec extends Specification {
 		clclosure.code = '{ -> '
 		clclosure.call()
 		then:
-		exc = thrown(ClmapClosureCallException)
+		exc = thrown(ClmapCallException)
 		exc.localizedMessage == String.format(
 			msgs.exc.closureExc,
 			msgs.exc.throwedClosure,
 			clclosure.clpath,
-			ClmapClosure.addLineNo(clclosure.code))
+			ClmapCallException.addLineNo(clclosure.code))
 	}
 	
 	def 'createClosure'(){
@@ -223,20 +223,20 @@ class ClmapClosureSpec extends Specification {
 		when:
 		source = '''\
 			#! clmap:test1
-			#> dec
+			#-dec
 				import org.apache.commons.lang3.StringUtils
-			#> prefix
+			#-prefix
 				println 'BGN HERE'
-			#> suffix
+			#-suffix
 				println 'END HERE'
 			#> map:map1
-			#>> args
+			#-args
 				String yourName
-			#>> return
+			#-return
 				String result
-			#>> dec
+			#-dec
 				String cmnString = 'This is'
-			#>> suffix
+			#-suffix
 				result += '!'
 			#>> closure:key1
 				result = StringUtils.trim("   ${cmnString} ${yourName}.   ")
@@ -244,15 +244,14 @@ class ClmapClosureSpec extends Specification {
 		expected = '''\
 				import org.apache.commons.lang3.StringUtils
 				String cmnString = 'This is'
-			{ 	String yourName ->
+			{ String yourName ->
 			String result
 				println 'BGN HERE'
 				result = StringUtils.trim("   ${cmnString} ${yourName}.   ")
 				println 'END HERE'
 				result += '!'
 				return result
-			}
-			'''.stripIndent().denormalize()
+			}'''.stripIndent().denormalize()
 		server.soak(source)
 		code = server.cl('/test1/map1#key1').createCode()
 		then:
@@ -262,48 +261,47 @@ class ClmapClosureSpec extends Specification {
 		source = '''\
 			#! clmap:test2
 			#> map:map1
-			#>> args
+			#-args
 				String greet
-			#-key
-				String target
-			#>> dec
+			#-dec
 				import org.apache.commons.lang3.StringUtils
-			#-key
-				// some dec
-			#>> prefix
+			#-prefix
 				String div = ', '
-			#-key
-				div = '-'
-			#>> suffix
+			#-suffix
 				return result
-			#-key
-				// some suffix
 			#>> closure
 				String result = StringUtils.trim("   ${greet}${div}.   ")
 			#>> closure:key
 				String result = StringUtils.trim("   ${greet}${div}${target}.   ")
+			#-args
+				String greet
+				String target
+			#-dec
+				// some dec
+			#-prefix
+				div = '-'
+			#-suffix
+				// some suffix
 			'''.stripIndent()
 		expected = '''\
 				import org.apache.commons.lang3.StringUtils
-			{ 	String greet ->
+			{ String greet ->
 				String div = ', '
 				String result = StringUtils.trim("   ${greet}${div}.   ")
 				return result
-			}
-			'''.stripIndent().denormalize()
+			}'''.stripIndent().denormalize()
 		expected2 = '''\
 				import org.apache.commons.lang3.StringUtils
 				// some dec
-			{ 	String greet,	String target ->
+			{ String greet, String target ->
 				String div = ', '
 				div = '-'
 				String result = StringUtils.trim("   ${greet}${div}${target}.   ")
 				return result
 				// some suffix
-			}
-			'''.stripIndent().denormalize()
+			}'''.stripIndent().denormalize()
 		server.soak(source)
-		code = server.cl('/test2/map1#dflt').createCode()
+		code = server.cl('/test2/map1#').createCode()
 		code2 = server.cl('/test2/map1#key').createCode()
 		then:
 		code == expected
@@ -313,19 +311,18 @@ class ClmapClosureSpec extends Specification {
 		source = '''\
 			#! clmap:test3
 			#> map:map1
-			#>> args
+			#-args
 				String yourName
-			#>> return
+			#-return
 				yourName
 			#>> closure:key1
 				yourName = "Hello, ${yourName}"
 			'''.stripIndent()
 		expected = '''\
-			{ 	String yourName ->
+			{ String yourName ->
 				yourName = "Hello, ${yourName}"
 				return yourName
-			}
-			'''.stripIndent().denormalize()
+			}'''.stripIndent().denormalize()
 		server.soak(source)
 		code = server.cl('/test3/map1#key1').createCode()
 		then:
@@ -341,9 +338,9 @@ class ClmapClosureSpec extends Specification {
 		source = '''\
 			#! clmap:test1
 			#> map:map1
-			#>> args
+			#-args
 				String yourName
-			#>> return String message
+			#-return String message
 			#>> closure:key1
 				message = 'Hello!'
 			'''.stripIndent().denormalize()
@@ -351,108 +348,6 @@ class ClmapClosureSpec extends Specification {
 		server.cl('/test1/map1#key1').createCode()
 		then:
 		exc = thrown(TpacSemanticException)
-		exc.message == msgs.exc.noReturnText
-	}
-	
-	def 'addLineNo'(){
-		given:
-		String result
-		String expected
-		
-		when:
-		result = ClmapClosure.addLineNo('')
-		then:
-		result == '1 '
-		
-		when:
-		result = ClmapClosure.addLineNo('a')
-		then:
-		result == '1 a'
-		
-		when:
-		result = ClmapClosure.addLineNo('''\
-			あ
-			い
-			う'''.stripIndent())
-		expected = '''\
-			1 あ
-			2 い
-			3 う'''.stripIndent().denormalize()
-		then:
-		result == expected
-		
-		when:
-		result = ClmapClosure.addLineNo('''\
-			
-			2
-			'''.stripIndent())
-		expected = '''\
-			1 
-			2 2'''.stripIndent().denormalize()
-		then:
-		result == expected
-		
-		when:
-		result = ClmapClosure.addLineNo('''\
-			
-			
-			3
-			4'''.stripIndent())
-		expected = '''\
-			1 
-			2 
-			3 3
-			4 4'''.stripIndent().denormalize()
-		then:
-		result == expected
-		
-		when:
-		result = ClmapClosure.addLineNo('''\
-			1
-			
-			
-			4'''.stripIndent())
-		expected = '''\
-			1 1
-			2 
-			3 
-			4 4'''.stripIndent().denormalize()
-		then:
-		result == expected
-		
-		when:
-		result = ClmapClosure.addLineNo('''\
-			|
-			|
-			|
-			|'''.stripMargin())
-		then:
-		result == ''
-		
-		when:
-		result = ClmapClosure.addLineNo('''\
-			|1
-			|
-			|
-			| 
-			|
-			|
-			|
-			|
-			|
-			|10'''.stripMargin())
-		expected = '''\
-			01 1
-			02 
-			03 
-			04  
-			05 
-			06 
-			07 
-			08 
-			09 
-			10 10'''.stripIndent().denormalize()
-		then:
-		result == expected
+		exc.message == String.format(msgs.exc.notText, 'return', 'map')
 	}
 }

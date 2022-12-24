@@ -28,10 +28,14 @@ class ClmapSpec extends Specification {
 		ClmapMap map = new ClmapMap(tag: 'map')
 		ClmapMap map1 = new ClmapMap(tag: 'map', name: 'map1')
 		ClmapMap map11 = new ClmapMap(tag: 'map', name: 'map11')
+		ClmapClosure cl1 = new ClmapClosure(tag: 'closure', name: 'cl1')
+		ClmapClosure cl2 = new ClmapClosure(tag: 'closure')
 		server << clmap
 		clmap << map
 		clmap << map1
 		map1 << map11
+		clmap << cl1
+		clmap << cl2
 		
 		expect:
 		clmap.cl(clpath) == server.solve(path)
@@ -42,6 +46,10 @@ class ClmapSpec extends Specification {
 		'dflt'			|| '/clmap:dec1/map'
 		'map1'			|| '/clmap:dec1/map:map1'
 		'map1/map11'	|| '/clmap:dec1/map:map1/map:map11'
+		'#cl1'			|| '/clmap:dec1/closure:cl1'
+		'#'				|| '/clmap:dec1/closure'
+		'/dec1#cl1'		|| '/clmap:dec1/closure:cl1'
+		'/dec1#'		|| '/clmap:dec1/closure'
 	}
 	
 	def 'cl - exception'(){
@@ -53,5 +61,46 @@ class ClmapSpec extends Specification {
 		then:
 		exc = thrown(TpacHandlingException)
 		exc.message == String.format(msgs.exc.invalidClpath, 'dec1#cl1/map1')
+		
+		when:
+		new Clmap(tag: 'clmap', name: 'dec1').cl('..')
+		then:
+		exc = thrown(TpacHandlingException)
+		exc.message == String.format(msgs.exc.invalidClpath, '..')
+	}
+	
+	def 'call'(){
+		given:
+		ClmapServer server
+		Clmap clmap
+		
+		when:
+		server = new ClmapServer()
+		clmap = server.soak('''\
+			#! clmap:call
+			#> closure
+				return 'Hello'
+			'''.stripIndent())['clmap:call']
+		then:
+		clmap.call() == 'Hello'
+	}
+	
+	def 'call - exception'(){
+		given:
+		ClmapServer server
+		Clmap clmap
+		TpacHandlingException exc
+		
+		when:
+		server = new ClmapServer()
+		clmap = server.soak('''\
+				#! clmap:call
+				#> closure:name
+					return 'Hello'
+			'''.stripIndent())['clmap:call']
+		clmap.call() == 'Hello'
+		then:
+		exc = thrown(TpacHandlingException)
+		exc.message == String.format(msgs.exc.invalidClpath, '#')
 	}
 }

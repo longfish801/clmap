@@ -26,7 +26,7 @@
 ```
 #! clmap
 #> map:const
-#>> args
+#-args
 	String time
 	String name
 #>> closure
@@ -44,17 +44,16 @@ greeting {
 	night = 'Good night'
 }
 #> map
-#>> args
+#-args
 	String name
-#>> return
+#-return
 	String message
-#>> suffix
-#-noon
-	message = message.toUpperCase()
 #>> closure:morning
 	message = clmap.cl('/dflt/const#dflt').call('morning', name)
 #>> closure:noon
 	message = clmap.cl('/dflt/const#dflt').call('noon', name)
+#-suffix
+	message = message.toUpperCase()
 #>> closure:night
 	message = clmap.cl('/dflt/const#dflt').call('night', name)
 ```
@@ -148,3 +147,8 @@ dependencies {
 
 1.1.03
 : TeaHandle#asStringを利用するよう処理を見直しました。
+
+2.0.00
+: args, return, decs, prefix, suffixはハンドルではなくキーで指定するよう修正しました。
+: 宣言やclosureハンドルにargs, return, decs, prefix, suffixを指定できるようにしました。
+
