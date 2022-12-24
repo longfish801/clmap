@@ -23,18 +23,37 @@ Here is a sample clmap document (src/test/resources/sample.tpac).
 
 ```
 #! clmap
-#> map
-#>> args
-	String yourName
+#> map:const
+#-args
+	String time
+	String name
 #>> closure
-	return "Hello, ${yourName}!"
-#>> closure:key1
-	return clmap.cl('#dflt').call(yourName.toLowerCase())
-#>> closure:key2
-	config.msg = 'HELLO, WORLD!'
-	return clmap.cl('#dflt').call(yourName.toUpperCase())
-#>> closure:key3
-	return config.msg
+	greet = clmap.solve('config:messages').config().greeting[time]
+	title = clmap.solve('data:title').dflt[titleMap[name]]
+	return "${greet}, ${title}${name}."
+#>> data:title
+Mr.
+Mrs.
+Ms.
+#>> config:messages
+greeting {
+	morning = 'Good morning'
+	noon = 'Hello'
+	night = 'Good night'
+}
+#> map
+#-args
+	String name
+#-return
+	String message
+#>> closure:morning
+	message = clmap.cl('/dflt/const#dflt').call('morning', name)
+#>> closure:noon
+	message = clmap.cl('/dflt/const#dflt').call('noon', name)
+#-suffix
+	message = message.toUpperCase()
+#>> closure:night
+	message = clmap.cl('/dflt/const#dflt').call('night', name)
 ```
 
 A script that reads the above clmap document, executes the closure and checks with assert to see if it gives the expected return value (src/test/groovy/Sample.groovy).

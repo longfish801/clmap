@@ -5,6 +5,7 @@
  */
 package io.github.longfish801.clmap
 
+import groovy.util.logging.Slf4j
 import io.github.longfish801.clmap.ClmapMsg as msgs
 import io.github.longfish801.tpac.TpacHandlingException
 import io.github.longfish801.tpac.TpacMaker
@@ -17,6 +18,7 @@ import spock.lang.Unroll
  * ClmapServerのテスト。
  * @author io.github.longfish801
  */
+@Slf4j('LOG')
 class ClmapServerSpec extends Specification {
 	/** ClmapServer */
 	@Shared ClmapServer server
@@ -29,7 +31,7 @@ class ClmapServerSpec extends Specification {
 		when:
 		server = new ClmapServer(ClmapServerSpec.class.classLoader)
 		then:
-		ClmapMap.loader == ClmapServerSpec.class.classLoader
+		Clmap.loader == ClmapServerSpec.class.classLoader
 	}
 	
 	def 'newMaker'(){
@@ -76,5 +78,52 @@ class ClmapServerSpec extends Specification {
 		then:
 		exc = thrown(TpacHandlingException)
 		exc.message == String.format(msgs.exc.invalidClpath, 'x')
+	}
+	
+	def 'clone'(){
+		given:
+		Clmap clmap
+		Clmap cloned
+		
+		when:
+		clmap = server.soak('''\
+				#! clmap:clone
+				#> map
+				#-return
+					String result
+				#>> closure
+					result = "${prop} - ${propu} - ${propa} - ${mprop} - ${mpropu} - ${mpropa}"
+				#>> closure:recall
+					result = clmap.cl('/clone/called#dflt').call()
+				#> map:called
+				#-return
+					String result
+				#>> closure
+					result = "${prop} - ${propu} - ${propa} - ${mprop} - ${mpropu} - ${mpropa}"
+			'''.stripIndent())['clmap:clone']
+		clmap.properties['prop'] = 'val'
+		clmap.properties['propu'] = 'valu'
+		clmap.cl('/clone/dflt').properties['mprop'] = 'mval'
+		clmap.cl('/clone/dflt').properties['mpropu'] = 'mvalu'
+		clmap.cl('/clone/called').properties['mprop'] = 'cmval'
+		clmap.cl('/clone/called').properties['mpropu'] = 'cmvalu'
+		cloned = clmap.clone()
+		cloned.properties['propu'] = 'valuc'
+		cloned.properties['propa'] = 'valac'
+		cloned.cl('/clone/dflt').properties['mpropu'] = 'mvaluc'
+		cloned.cl('/clone/dflt').properties['mpropa'] = 'mvalac'
+		cloned.cl('/clone/called').properties['mpropu'] = 'cmvaluc'
+		cloned.cl('/clone/called').properties['mpropa'] = 'cmvalac'
+		clmap.properties['propu'] = 'valuo'
+		clmap.properties['propa'] = 'vala'
+		clmap.cl('/clone/dflt').properties['mpropu'] = 'mvaluo'
+		clmap.cl('/clone/dflt').properties['mpropa'] = 'mvala'
+		clmap.cl('/clone/called').properties['mpropu'] = 'cmvaluo'
+		clmap.cl('/clone/called').properties['mpropa'] = 'cmvala'
+		then:
+		clmap.cl('dflt#dflt').call() == 'val - valuo - vala - mval - mvaluo - mvala'
+		cloned.cl('dflt#dflt').call() == 'val - valuc - valac - mval - mvaluc - mvalac'
+		clmap.cl('dflt#recall').call() == 'val - valuo - vala - cmval - cmvaluo - cmvala'
+		cloned.cl('dflt#recall').call() == 'val - valuc - valac - cmval - cmvaluc - cmvalac'
 	}
 }

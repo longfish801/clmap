@@ -23,10 +23,10 @@ class ClmapConfig implements TeaHandle {
 	 * @return ConfigObject
 	 */
 	ConfigObject config(){
-		String data = map.values().findAll {
+		String data = map.findAll {
 			it.value instanceof List
-		}.collect {
-			it.join(System.lineSeparator())
+		}.keySet().collect {
+			asString(it)
 		}.join(System.lineSeparator())
 		return (data.length() == 0)? null : slurper.parse(data)
 	}
@@ -38,7 +38,7 @@ class ClmapConfig implements TeaHandle {
 	 * @return ConfigObject
 	 */
 	ConfigObject config(String key){
-		String data = (map.get(key) instanceof List)? map.get(key).join(System.lineSeparator()) : ''
+		String data = (map.get(key) instanceof List)? asString(key) : ''
 		return (data.length() == 0)? null : slurper.parse(data)
 	}
 }

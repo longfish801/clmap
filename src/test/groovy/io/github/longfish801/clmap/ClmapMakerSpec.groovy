@@ -41,7 +41,8 @@ class ClmapMakerSpec extends Specification {
 		tag			|| classname
 		'closure'	|| 'ClmapClosure'
 		'map'		|| 'ClmapMap'
-		'args'		|| 'TpacHandle'
+		'config'	|| 'ClmapConfig'
+		'data'		|| 'TpacHandle'
 	}
 	
 	def 'newTeaHandle - exception'(){
@@ -55,9 +56,9 @@ class ClmapMakerSpec extends Specification {
 		exc.message == String.format(msgs.exc.invalidTag, 'nosuch')
 		
 		when:
-		maker.newTeaHandle('closure', '', new TpacHandle(tag: 'clmap'))
+		maker.newTeaHandle('map', '', new TpacHandle(tag: 'closure'))
 		then:
 		exc = thrown(TpacSemanticException)
-		exc.message == String.format(msgs.exc.invalidHierarchy, 'closure', 'clmap')
+		exc.message == String.format(msgs.exc.invalidHierarchy, 'map', 'closure')
 	}
 }

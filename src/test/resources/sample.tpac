@@ -1,6 +1,6 @@
 #! clmap
 #> map:const
-#>> args
+#-args
 	String time
 	String name
 #>> closure
@@ -18,16 +18,15 @@ greeting {
 	night = 'Good night'
 }
 #> map
-#>> args
+#-args
 	String name
-#>> return
+#-return
 	String message
-#>> suffix
-#-noon
-	message = message.toUpperCase()
 #>> closure:morning
 	message = clmap.cl('/dflt/const#dflt').call('morning', name)
 #>> closure:noon
 	message = clmap.cl('/dflt/const#dflt').call('noon', name)
+#-suffix
+	message = message.toUpperCase()
 #>> closure:night
 	message = clmap.cl('/dflt/const#dflt').call('night', name)

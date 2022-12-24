@@ -26,12 +26,12 @@ class ClmapServer implements TeaServer {
 	
 	/**
 	 * コンストラクタ。<br/>
-	 * 引数loaderを {@link ClmapMap}のメンバ変数 loaderに設定します。
+	 * 引数loaderを {@link Clmap}のメンバ変数 loaderに設定します。
 	 * @param loader ClassLoader
 	 * @return 自インスタンス
 	 */
 	ClmapServer(ClassLoader loader){
-		ClmapMap.loader = loader
+		Clmap.loader = loader
 	}
 	
 	/**
@@ -66,7 +66,13 @@ class ClmapServer implements TeaServer {
 		Matcher matcher = Matcher.lastMatcher
 		String firstPath = matcher.group(1)
 		String otherPath = (matcher.groupCount() >= 2)? matcher.group(2) : ''
-		String clname = (firstPath == cnst.clpath.noname)? '' : ":${firstPath}"
+		// 先頭の要素にマップ名とクロージャ名がある場合、マップ名を先頭の要素に、クロージャ名を残りのパスに分割します
+		if (otherPath.empty && firstPath ==~ cnst.clpath.closures){
+			matcher = Matcher.lastMatcher
+			firstPath = matcher.group(1)
+			otherPath = cnst.clpath.anchor + matcher.group(2)
+		}
+		String clname = (firstPath == cnst.clpath.noname.map)? '' : ":${firstPath}"
 		def dec = getAt("clmap${clname}")
 		return (otherPath.empty)? dec : dec?.cl(otherPath)
 	}

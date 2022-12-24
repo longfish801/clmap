@@ -5,6 +5,7 @@
  */
 package io.github.longfish801.clmap
 
+import groovy.util.logging.Slf4j
 import io.github.longfish801.clmap.ClmapConst as cnst
 import io.github.longfish801.clmap.ClmapMsg as msgs
 import io.github.longfish801.tpac.TpacHandlingException
@@ -15,11 +16,8 @@ import java.util.regex.Matcher
  * マップです。
  * @author io.github.longfish801
  */
+@Slf4j('LOG')
 class ClmapMap implements TeaHandle {
-	/** ClassLoader */
-	static ClassLoader loader
-	/** GroovyShell */
-	GroovyShell shell
 	/**
 	 * 各クロージャの大域変数として使用するプロパティ。<br/>
 	 * デフォルトでキー'clmap'に対し値として自インスタンスを保持します。
@@ -27,16 +25,16 @@ class ClmapMap implements TeaHandle {
 	Map properties = [(cnst.map.dflt): this]
 	
 	/**
-	 * コンストラクタ。<br/>
-	 * メンバ変数 loaderが nullのときは
-	 * ClmapMap.class.classLoaderで初期化します。<br/>
-	 * メンバ変数 shellを初期化します。<br/>
-	 * GroovyShellのコンストラクタには引数としてメンバ変数loaderを渡します。
-	 * @return 自インスタンス
+	 * 再帰的に下位のハンドルも含めてクローンします。<br/>
+	 * 大域変数のプロパティは各値をシャローコピーします。
+	 * @return クローン
 	 */
-	ClmapMap(){
-		if (loader == null) loader = ClmapMap.class.classLoader
-		shell = new GroovyShell(loader)
+	@Override
+	ClmapMap cloneRecursive(){
+		ClmapMap cloned = (ClmapMap) TeaHandle.super.cloneRecursive()
+		cloned.properties = properties.collectEntries { String key, def val -> [key, val] }
+		cloned.properties[(cnst.map.dflt)] = cloned
+		return cloned
 	}
 	
 	/**
