@@ -152,3 +152,6 @@ dependencies {
 : args, return, decs, prefix, suffixはハンドルではなくキーで指定するよう修正しました。
 : 宣言やclosureハンドルにargs, return, decs, prefix, suffixを指定できるようにしました。
 
+2.0.01
+: mapハンドル名がクラスとみなされないようクロージャの名前を修正しました。
+
