@@ -50,6 +50,10 @@ closure {
 	ret = '	return '
 	retdiv = ' '
 	lsep = System.lineSeparator()
+	name {
+		prefix = 'CLMAP'
+		repMap = ['/': '_', '#': '-']
+	}
 }
 
 // NULLを意味する文字列

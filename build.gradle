@@ -14,7 +14,7 @@ plugins {
 
 defaultTasks 'fix'
 group = 'io.github.longfish801'
-version = '2.0.00'
+version = '2.1.00'
 
 // mavenローカルリポジトリへのパスが設定されているか確認します
 if (System.properties.mavenPath == null || System.properties.mavenPath.empty){

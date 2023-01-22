@@ -78,12 +78,15 @@ class ClmapClosure implements TeaHandle {
 	/**
 	 * クロージャを生成します。<br/>
 	 * クロージャのソースコードを未作成であれば、作成してメンバ変数 codeに格納します。<br/>
+	 * ソースコードのコンパイルは {@link GroovyShell#evaluate(String,String)}を用います。<br/>
+	 * このときクロージャの名前は {@link #getClosureName()}から取得します。<br/>
 	 * クロージャ生成時、{@link Clmap}, {@link ClmapMap}クラスのメンバ変数 propertiesを
 	 * 大域変数として利用できるよう設定（delegateに設定）します。<br/>
 	 * 同じ大域変数名がある場合はより下位の {@link ClmapMap}クラスでの値で上書きされます。<br/>
 	 * コンパイル時に Throwableをキャッチしたならば WARNログを出力します。
 	 * @return クロージャ
 	 * @see #createCode()
+	 * @see #getClosureName()
 	 */
 	Closure createClosure(){
 		if (code == null){
@@ -98,13 +101,30 @@ class ClmapClosure implements TeaHandle {
 		}
 		Closure closure
 		try {
-			closure = (dec as Clmap).shell.evaluate(code, clpath)
+			closure = (dec as Clmap).shell.evaluate(code, closureName)
 			closure.delegate = getProperties.call(upper)
 		} catch (Throwable exc){
 			LOG.warn(String.format(msgs.logmsg.failedCompile, clpath, ClmapCallException.addLineNo(code)))
 			throw exc
 		}
 		return closure
+	}
+	
+	/**
+	 * クロージャの名前を返します。<br/>
+	 * クロージャパスに以下の加工を施した文字列を返します。</p>
+	 * <ol>
+	 * <li>区切り文字 "/"を "_"に、"#"を "-"にすべて置換します。</li>
+	 * <li>接頭辞として "CLMAP"を付与します。</li>
+	 * <ol>
+	 * @return クロージャの名前
+	 */
+	String getClosureName(){
+		String clName = clpath
+		cnst.closure.name.repMap.each { String from, String to ->
+			clName = clName.replaceAll(from, to)
+		}
+		return cnst.closure.name.prefix + clName
 	}
 	
 	/**

@@ -214,6 +214,37 @@ class ClmapClosureSpec extends Specification {
 		exc.message.startsWith('startup failed:') == true
 	}
 	
+	def 'getClosureName'(){
+		given:
+		Clmap clmap
+		ClmapMap map1, map11
+		ClmapClosure cl111
+		
+		when:
+		clmap = new Clmap(tag: 'clmap', name: 'dec1')
+		map1 = new ClmapMap(tag: 'map', name: 'map1')
+		map11 = new ClmapMap(tag: 'map', name: 'map11')
+		cl111 = new ClmapClosure(tag: 'closure', name: 'cl1')
+		server << clmap
+		clmap << map1
+		map1 << map11
+		map11 << cl111
+		then:
+		cl111.closureName == 'CLMAP_dec1_map1_map11-cl1'
+		
+		when:
+		clmap = new Clmap(tag: 'clmap')
+		map1 = new ClmapMap(tag: 'map')
+		map11 = new ClmapMap(tag: 'map')
+		cl111 = new ClmapClosure(tag: 'closure')
+		server << clmap
+		clmap << map1
+		map1 << map11
+		map11 << cl111
+		then:
+		cl111.closureName == 'CLMAP_dflt_dflt_dflt-'
+	}
+	
 	def 'createCode'(){
 		given:
 		String source
