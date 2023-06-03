@@ -47,6 +47,7 @@ class Clmap implements TeaDec {
 	Clmap cloneRecursive(){
 		Clmap cloned = (Clmap) TeaDec.super.cloneRecursive()
 		cloned.properties = properties.collectEntries { String key, def val -> [key, val] }
+		cloned.properties[(cnst.map.dflt)] = cloned
 		return cloned
 	}
 	
